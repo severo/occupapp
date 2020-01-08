@@ -92,7 +92,7 @@ const points = getModule(Points)
     MainPanel
   }
 })
-export default class Home extends Vue {
+export default class Main extends Vue {
   // annotate refs type
   $refs!: {
     container: HTMLElement,
