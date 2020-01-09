@@ -151,10 +151,8 @@ export default Vue.extend({
     }
   },
   watch: {
-    '$store.state.route.query' (query) {
-      if ('imageSrc' in query) {
-        composition.fromSrc(query.imageSrc)
-      }
+    '$store.state.route.query.imageSrc' (imageSrc) {
+      composition.fromSrc(imageSrc)
     }
   }
 })
