@@ -92,11 +92,9 @@ import { ImageSrc } from '@/utils/types.ts'
 import ImageUploaderButton from '@/components/ImageUploaderButton.vue'
 
 import BackgroundImage from '@/store/current/backgroundImage.ts'
-import Composition from '@/store/current/composition.ts'
 import GalleryImages from '@/store/galleryImages.ts'
 
 const backgroundImage = getModule(BackgroundImage)
-const composition = getModule(Composition)
 const galleryImages = getModule(GalleryImages)
 
 @Component({
@@ -118,8 +116,8 @@ export default class Gallery extends Vue {
     return this.srcsArray.indexOf(backgroundImage.src)
   }
   set selected (idx: number) {
-    composition.fromSrc(this.srcsArray[idx])
-    this.$emit('selected')
+    this.$router.push({ query: { ...this.$store.state.route.query, imageSrc: this.srcsArray[idx] } })
+    // this.$emit('selected')
   }
   addFiles (files: File[]) {
     galleryImages.appendFilesArray(files)

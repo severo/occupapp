@@ -99,12 +99,6 @@ export default class Main extends Vue {
     firstcol: HTMLElement
   }
 
-  // lifecycle hook
-  mounted () {
-    // Init the composition
-    composition.initWithSomething()
-  }
-
   get buttonIcon (): string {
     return mdiPlus
   }

@@ -4,6 +4,9 @@ import router from './router'
 import store from './store'
 import vuetify from './plugins/vuetify'
 
+import { sync } from 'vuex-router-sync'
+sync(store, router) // done. Returns an unsync callback fn
+
 Vue.config.productionTip = false
 
 new Vue({

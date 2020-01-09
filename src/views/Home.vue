@@ -97,6 +97,13 @@ import ImagesPanel from '@/components/ImagesPanel.vue'
 import Infos from '@/components/Infos.vue'
 import Main from '@/components/Main.vue'
 
+import { getModule } from 'vuex-module-decorators'
+
+import Composition from '@/store/current/composition.ts'
+import GalleryImages from '@/store/galleryImages.ts'
+const composition = getModule(Composition)
+const galleryImages = getModule(GalleryImages)
+
 export default Vue.extend({
   name: 'Home',
   data: () => ({
@@ -109,6 +116,13 @@ export default Vue.extend({
   mounted: function () {
     this.small = this.$vuetify.breakpoint.thresholds.md * 0.5
     this.barWidth = this.small
+
+    // Init the composition
+    if (this.$store.state.route.query.imageSrc === undefined) {
+      this.$router.push({ query: { ...this.$store.state.route.query, imageSrc: galleryImages.defaultSrc } })
+    } else {
+      composition.fromSrc(this.$store.state.route.query.imageSrc)
+    }
   },
   components: {
     PointsList,
@@ -133,6 +147,13 @@ export default Vue.extend({
         this.barWidth = this.big
       } else {
         this.barWidth = this.small
+      }
+    }
+  },
+  watch: {
+    '$store.state.route.query' (query) {
+      if ('imageSrc' in query) {
+        composition.fromSrc(query.imageSrc)
       }
     }
   }
