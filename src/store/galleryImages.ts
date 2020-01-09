@@ -78,6 +78,10 @@ export default class GalleryImages extends VuexModule {
     this.fromMap(arrayToMap(list))
   }
   @Action
+  appendSrc (src: string) {
+    this.set({ src })
+  }
+  @Action
   appendArray (list: ImageSrc[]) {
     for (const s of list) {
       this.set(s)

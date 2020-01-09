@@ -17,6 +17,10 @@ export async function fetchImage ({
   })
 }
 
+export async function validateImageSrc ({ src, srcset }: ImageSrc): Promise<boolean> {
+  return fetchImage({ src, srcset }).then(() => true).catch(() => false)
+}
+
 /*
  * Create a Base64 Image URL, with rotation applied to compensate for EXIF orientation, if needed.
  *

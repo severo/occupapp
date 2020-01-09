@@ -65,10 +65,10 @@ export default class Composition extends VuexModule {
 
     // Nothing to do if the same image has been selected
     if (backgroundImage.src !== src) {
-      // if the src does not exist in the gallery, try to add it first
+      // if the src does not exist in the gallery, add it first
       // it allows for example to add an image just by setting its src in the URL query string
-      if (!galleryImages.has(src)) {
-        galleryImages.set({ src })
+      if (!galleryImages.asMap.has(src)) {
+        galleryImages.appendSrc(src)
       }
 
       this.saveComposition()

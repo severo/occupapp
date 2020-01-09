@@ -99,8 +99,12 @@ import Main from '@/components/Main.vue'
 
 import { getModule } from 'vuex-module-decorators'
 
+import { validateImageSrc } from '@/utils/img.ts'
+
+import BackgroundImage from '@/store/current/backgroundImage.ts'
 import Composition from '@/store/current/composition.ts'
 import GalleryImages from '@/store/galleryImages.ts'
+const backgroundImage = getModule(BackgroundImage)
 const composition = getModule(Composition)
 const galleryImages = getModule(GalleryImages)
 
@@ -121,7 +125,7 @@ export default Vue.extend({
     if (this.$store.state.route.query.imageSrc === undefined) {
       this.$router.push({ query: { ...this.$store.state.route.query, imageSrc: galleryImages.defaultSrc } })
     } else {
-      composition.fromSrc(this.$store.state.route.query.imageSrc)
+      this.setImageSrc(this.$store.state.route.query.imageSrc)
     }
   },
   components: {
@@ -148,11 +152,19 @@ export default Vue.extend({
       } else {
         this.barWidth = this.small
       }
+    },
+    setImageSrc: async function (src: string) {
+      if (await validateImageSrc({ src })) {
+        composition.fromSrc(src)
+      } else {
+        // force reload current image, or the default image if it doesn't exist
+        this.$router.push({ query: { ...this.$store.state.route.query, imageSrc: backgroundImage.image.src || galleryImages.defaultSrc } })
+      }
     }
   },
   watch: {
-    '$store.state.route.query.imageSrc' (imageSrc) {
-      composition.fromSrc(imageSrc)
+    '$store.state.route.query.imageSrc' (src) {
+      this.setImageSrc(src)
     }
   }
 })
