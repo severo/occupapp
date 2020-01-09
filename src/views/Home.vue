@@ -90,14 +90,15 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import Component from 'vue-class-component'
+import { Watch } from 'vue-property-decorator'
+import { getModule } from 'vuex-module-decorators'
 
 import PointsList from '@/components/PointsList.vue'
 import TablesPanel from '@/components/TablesPanel.vue'
 import ImagesPanel from '@/components/ImagesPanel.vue'
 import Infos from '@/components/Infos.vue'
 import Main from '@/components/Main.vue'
-
-import { getModule } from 'vuex-module-decorators'
 
 import { validateImageSrc } from '@/utils/img.ts'
 
@@ -108,16 +109,35 @@ const backgroundImage = getModule(BackgroundImage)
 const composition = getModule(Composition)
 const galleryImages = getModule(GalleryImages)
 
-export default Vue.extend({
-  name: 'Home',
-  data: () => ({
-    small: 600,
-    big: 6000,
-    barWidth: 600,
-    drawer: false,
-    view: 'points'
-  }),
-  mounted: function () {
+@Component({
+  components: {
+    PointsList,
+    TablesPanel,
+    ImagesPanel,
+    Infos,
+    Main
+  }
+})
+export default class Home extends Vue {
+  // local data
+  small = 600
+  big = 6000
+  barWidth = 600
+  drawer = false
+  view = 'points'
+
+  // computed
+  get viewTitle (): string {
+    const titles: Map<string, string> = new Map([
+      ['tables', 'Data Tables'],
+      ['images', 'Background Image'],
+      ['points', 'Points']
+    ])
+    return titles.get(this.view) || ''
+  }
+
+  // lifecycle hook
+  mounted () {
     this.small = this.$vuetify.breakpoint.thresholds.md * 0.5
     this.barWidth = this.small
 
@@ -127,47 +147,30 @@ export default Vue.extend({
     } else {
       this.setImageSrc(this.$store.state.route.query.imageSrc)
     }
-  },
-  components: {
-    PointsList,
-    TablesPanel,
-    ImagesPanel,
-    Infos,
-    Main
-  },
-  computed: {
-    viewTitle: function () {
-      const titles: Map<string, string> = new Map([
-        ['tables', 'Data Tables'],
-        ['images', 'Background Image'],
-        ['points', 'Points']
-      ])
-      return titles.get(this.view) || ''
-    }
-  },
-  methods: {
-    toggleFullscreen: function () {
-      if (this.barWidth === this.small) {
-        this.barWidth = this.big
-      } else {
-        this.barWidth = this.small
-      }
-    },
-    setImageSrc: async function (src: string) {
-      if (await validateImageSrc({ src })) {
-        composition.fromSrc(src)
-      } else {
-        // force reload current image, or the default image if it doesn't exist
-        this.$router.push({ query: { ...this.$store.state.route.query, imageSrc: backgroundImage.image.src || galleryImages.defaultSrc } })
-      }
-    }
-  },
-  watch: {
-    '$store.state.route.query.imageSrc' (src) {
-      this.setImageSrc(src)
+  }
+
+  // methods
+  toggleFullscreen () {
+    if (this.barWidth === this.small) {
+      this.barWidth = this.big
+    } else {
+      this.barWidth = this.small
     }
   }
-})
+  async setImageSrc (src: string) {
+    if (await validateImageSrc({ src })) {
+      composition.fromSrc(src)
+    } else {
+      // force reload current image, or the default image if it doesn't exist
+      this.$router.push({ query: { ...this.$store.state.route.query, imageSrc: backgroundImage.image.src || galleryImages.defaultSrc } })
+    }
+  }
+
+  @Watch('$store.state.route.query.imageSrc')
+  onImageSrcChange (val: string, oldVal: string) {
+    this.setImageSrc(val)
+  }
+}
 </script>
 
 <style lang="sass">
