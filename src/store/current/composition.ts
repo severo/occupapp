@@ -57,12 +57,7 @@ export default class Composition extends VuexModule {
   }
 
   @Action
-  async fromSrc (inputSrc: string) {
-    // manage the special case of locally uploaded images
-    const localPrefix = 'local:'
-    const localId = (inputSrc.indexOf(localPrefix) === 0) ? inputSrc.slice(localPrefix.length) : ''
-    const src = (galleryImages.asLocalIdMap.get(localId) || { src: inputSrc }).src
-
+  async fromSrc (src: string) {
     // Nothing to do if the same image has been selected
     if (backgroundImage.src !== src) {
       // if the src does not exist in the gallery, add it first
@@ -78,6 +73,16 @@ export default class Composition extends VuexModule {
       } else {
         await this.fromSrcOnly(src)
       }
+    }
+  }
+
+  @Action
+  async fromLocalId (localId: string) {
+    const image = galleryImages.asLocalIdMap.get(localId)
+    if (image !== undefined) {
+      await this.fromSrc(image.src)
+    } else {
+      throw RangeError(`${localId} locally uploaded image has not been found in the gallery.`)
     }
   }
 }

@@ -93,7 +93,7 @@ export default class GalleryImages extends VuexModule {
     for (const f of files) {
       const base64Str = await getImageUrl(f)
       if (base64Str !== '') {
-        list.push({ src: base64Str, localId: uuid.v4() })
+        list.push({ src: base64Str, localId: `local:${uuid.v4()}` })
       }
     }
     this.appendArray(list)

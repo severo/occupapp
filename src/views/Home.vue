@@ -157,9 +157,18 @@ export default class Home extends Vue {
       this.barWidth = this.small
     }
   }
+
+  validateLocalId (src: string) {
+    const localPrefix = 'local:'
+    return (src.indexOf(localPrefix) === 0) && galleryImages.asLocalIdMap.has(src)
+  }
+
   async setImageSrc (src: string) {
-    if (await validateImageSrc({ src })) {
-      composition.fromSrc(src)
+    // manage the special case of locally uploaded images
+    if (this.validateLocalId(src)) {
+      await composition.fromLocalId(src)
+    } else if (await validateImageSrc({ src })) {
+      await composition.fromSrc(src)
     } else {
       // force reload current image, or the default image if it doesn't exist
       this.$router.push({ query: { ...this.$store.state.route.query, imageSrc: backgroundImage.image.src || galleryImages.defaultSrc } })

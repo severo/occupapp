@@ -119,7 +119,7 @@ export default class Gallery extends Vue {
     const src = this.srcsArray[idx]
     const image = galleryImages.get(src)
     const imageSrc = (image && 'localId' in image)
-      ? `local:${image.localId}`
+      ? image.localId
       : src
     this.$router.push({ query: { ...this.$store.state.route.query, imageSrc } })
 
