@@ -49,9 +49,9 @@ export default class GalleryImages extends VuexModule {
   // get values (): IterableIterator<Point> {
   //   return this.asMap.values()
   // }
-  // get has (): (id:string) => boolean {
-  //   return (id:string): boolean => this.asMap.has(id)
-  // }
+  get has (): (id:string) => boolean {
+    return (id:string): boolean => this.asMap.has(id)
+  }
 
   // Mutations (synchronous)
   @Mutation
