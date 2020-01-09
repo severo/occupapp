@@ -1,4 +1,5 @@
 // See https://championswimmer.in/vuex-module-decorators/
+import uuid from 'uuid'
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import store from '@/store'
 import { ImageSrc } from '@/utils/types.ts'
@@ -31,6 +32,15 @@ export default class GalleryImages extends VuexModule {
   }
   get defaultSrc (): string {
     return this.size ? this.asArray[0].src : ''
+  }
+  get asLocalIdMap (): Map<string, ImageSrc> {
+    // Only contains the locally uploaded images, with the localId string as
+    // the key
+    return new Map(
+      this.asArray
+        .filter(i => 'localId' in i && i.localId !== undefined)
+        .map(i => [i.localId || 'shouldneverbeused', i])
+    )
   }
   // USE?
   // get keys (): IterableIterator<string> {
@@ -79,7 +89,7 @@ export default class GalleryImages extends VuexModule {
     for (const f of files) {
       const base64Str = await getImageUrl(f)
       if (base64Str !== '') {
-        list.push({ src: base64Str })
+        list.push({ src: base64Str, localId: uuid.v4() })
       }
     }
     this.appendArray(list)

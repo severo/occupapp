@@ -116,7 +116,13 @@ export default class Gallery extends Vue {
     return this.srcsArray.indexOf(backgroundImage.src)
   }
   set selected (idx: number) {
-    this.$router.push({ query: { ...this.$store.state.route.query, imageSrc: this.srcsArray[idx] } })
+    const src = this.srcsArray[idx]
+    const image = galleryImages.get(src)
+    const imageSrc = (image && 'localId' in image)
+      ? `local:${image.localId}`
+      : src
+    this.$router.push({ query: { ...this.$store.state.route.query, imageSrc } })
+
     // this.$emit('selected')
   }
   addFiles (files: File[]) {

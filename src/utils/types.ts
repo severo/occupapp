@@ -3,6 +3,7 @@ export interface ImageSrc {
     src: string;
     srcset?: string;
     thumbnailSrc?: string;
+    localId?: string;
 }
 
 // Points
