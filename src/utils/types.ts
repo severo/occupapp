@@ -15,7 +15,7 @@ export interface XYId extends XY {
   id: string;
 }
 export interface XYCategory extends XY {
-  categoryId: string;
+  categoryId?: string;
 }
 export interface Point extends XYCategory {
   id: string;

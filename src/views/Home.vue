@@ -101,13 +101,23 @@ import Infos from '@/components/Infos.vue'
 import Main from '@/components/Main.vue'
 
 import { validateImageSrc } from '@/utils/img.ts'
+import { Category, ExportableComposition, ImageSrc, Point } from '@/utils/types.ts'
 
 import BackgroundImage from '@/store/current/backgroundImage.ts'
-import Composition from '@/store/current/composition.ts'
+import Categories from '@/store/current/categories.ts'
+import ExportableCompositions from '@/store/exportableCompositions.ts'
 import GalleryImages from '@/store/galleryImages.ts'
+import Points from '@/store/current/points.ts'
+import PointsMetrics from '@/store/current/pointsMetrics.ts'
+import PointsSelection from '@/store/current/pointsSelection.ts'
+
 const backgroundImage = getModule(BackgroundImage)
-const composition = getModule(Composition)
+const categories = getModule(Categories)
+const exportableCompositions = getModule(ExportableCompositions)
 const galleryImages = getModule(GalleryImages)
+const points = getModule(Points)
+const pointsMetrics = getModule(PointsMetrics)
+const pointsSelection = getModule(PointsSelection)
 
 @Component({
   components: {
@@ -142,11 +152,7 @@ export default class Home extends Vue {
     this.barWidth = this.small
 
     // Init the composition
-    if (this.$store.state.route.query.imageSrc === undefined) {
-      this.$router.push({ query: { ...this.$store.state.route.query, imageSrc: galleryImages.defaultSrc } })
-    } else {
-      this.setImageSrc(this.$store.state.route.query.imageSrc)
-    }
+    this.processQuery(this.$store.state.route.query)
   }
 
   // methods
@@ -158,26 +164,172 @@ export default class Home extends Vue {
     }
   }
 
-  validateLocalId (src: string) {
-    const localPrefix = 'local:'
-    return (src.indexOf(localPrefix) === 0) && galleryImages.asLocalIdMap.has(src)
-  }
+  async parseImageSrc (query: any): Promise<ImageSrc | undefined> {
+    // First: ensure there is an imageSrc
+    if ('imageSrc' in query && typeof query.imageSrc === 'string') {
+      const parsed = query.imageSrc
 
-  async setImageSrc (src: string) {
-    // manage the special case of locally uploaded images
-    if (this.validateLocalId(src)) {
-      await composition.fromLocalId(src)
-    } else if (await validateImageSrc({ src })) {
-      await composition.fromSrc(src)
-    } else {
-      // force reload current image, or the default image if it doesn't exist
-      this.$router.push({ query: { ...this.$store.state.route.query, imageSrc: backgroundImage.image.src || galleryImages.defaultSrc } })
+      // is it already in the gallery?
+      const im: ImageSrc | undefined = galleryImages.get(parsed)
+      if (im !== undefined) {
+        return im
+      }
+
+      // or is it a valid image URL?
+      const newIm: ImageSrc = { src: parsed }
+      if (await validateImageSrc(newIm)) {
+        return newIm
+      }
     }
   }
 
-  @Watch('$store.state.route.query.imageSrc')
-  onImageSrcChange (val: string, oldVal: string) {
-    this.setImageSrc(val)
+  parseCategories (query: any): Category[] | undefined {
+    // First: ensure there is a categories field
+    if ('categories' in query && typeof query.categories === 'string') {
+      const parsed = JSON.parse(query.categories)
+      const arr: Category[] = []
+      if (Array.isArray(parsed)) {
+        for (const c of parsed) {
+          // TODO: add more validation (uuid length? color formats?)
+          if ('id' in c && 'color' in c && typeof c.id === 'string' && typeof c.color === 'string') {
+            arr.push({ id: c.id, color: c.color })
+          }
+        }
+        return arr
+        // in any other case: returns undefined
+      }
+    }
+  }
+
+  parsePoints (query: any): Point[] | undefined {
+    // First: ensure there is a categories field
+    if ('categories' in query && typeof query.points === 'string') {
+      const parsed = JSON.parse(query.points)
+      const arr: Point[] = []
+      if (Array.isArray(parsed)) {
+        for (const p of parsed) {
+          // TODO: add more validation
+          if ('id' in p && typeof p.id === 'string' &&
+            'number' in p && typeof p.number === 'number' &&
+            'x' in p && typeof p.x === 'number' &&
+            'y' in p && typeof p.y === 'number'
+          ) {
+            const newPoint = { id: p.id, number: p.number, x: p.x, y: p.y }
+            if ('categoryId' in p && typeof p.categoryId === 'string') {
+              arr.push({ ...newPoint, categoryId: p.categoryId })
+            } else {
+              arr.push(newPoint)
+            }
+          }
+        }
+        return arr
+        // in any other case: returns undefined
+      }
+    }
+  }
+
+  push (c: ExportableComposition) {
+    this.$router.push({ query: {
+      ...this.$store.state.route.query,
+      imageSrc: c.backgroundImage.localId || c.backgroundImage.src,
+      categories: JSON.stringify(c.categories),
+      points: JSON.stringify(c.points)
+    } })
+  }
+
+  saveComposition () {
+    // Save the current composition to exportableCompositions
+    const c = {
+      backgroundImage: backgroundImage.imageSrc,
+      categories: categories.asArray,
+      points: points.asArray
+    }
+    exportableCompositions.set(c)
+  }
+
+  async fromExportableComposition (c: ExportableComposition) {
+    await backgroundImage.fromImageSrc(c.backgroundImage)
+    categories.fromArray(c.categories)
+    points.fromArray(c.points)
+    pointsMetrics.clear()
+    pointsSelection.clear()
+  }
+
+  async processQuery (query: string) {
+    // The query arguments are parsed and validated in order: imageSrc, then categories, then points.
+    // If an argument is invalid, it's fixed and the URL is modified (the process stops here)
+    // Else, if all arguments are OK, the state is updated
+
+    const imageSrc: ImageSrc | undefined = await this.parseImageSrc(query)
+    if (imageSrc === undefined) {
+      // imageSrc should have been valid
+      // first option to fix it: load a saved composition for the current background image
+      const c: ExportableComposition | undefined = exportableCompositions.get(backgroundImage.src)
+      if (c !== undefined) {
+        this.push(c)
+        return
+      }
+      // second option: load the default composition
+      const defaultComposition: ExportableComposition = { backgroundImage: { src: galleryImages.defaultSrc }, categories: categories.defaultArray, points: [] }
+      this.push(defaultComposition)
+      return
+    }
+
+    const cats: Category[] | undefined = this.parseCategories(query)
+    if (cats === undefined) {
+      // categories should have been valid
+      // first option to fix them: load an existing composition for imageSrc and restore it
+      const c: ExportableComposition | undefined = exportableCompositions.get(imageSrc.src)
+      if (c !== undefined) {
+        this.push(c)
+        return
+      }
+      // second option: create a new composition for imageSrc and load it
+      const newComposition: ExportableComposition = { backgroundImage: imageSrc, categories: categories.defaultArray, points: [] }
+      this.push(newComposition)
+      return
+    }
+
+    const pts: Point[] | undefined = this.parsePoints(query)
+    if (pts === undefined) {
+      // points should have been valid
+      // first option to fix them: load an existing composition for imageSrc and restore it
+      const c: ExportableComposition | undefined = exportableCompositions.get(imageSrc.src)
+      if (c !== undefined) {
+        this.push(c)
+        return
+      }
+      // second option: create a new composition for imageSrc and categories, and load it
+      const newComposition: ExportableComposition = { backgroundImage: imageSrc, categories: cats, points: [] }
+      this.push(newComposition)
+      return
+    }
+
+    // If some points refer to a non-existing category, remove it and reload
+    const catsIds = cats.map(c => c.id)
+    const hasInvalidCategoryId = (p: Point): boolean => (p.categoryId !== undefined) && (!catsIds.includes(p.categoryId))
+    if (pts.some(hasInvalidCategoryId)) {
+      const newPts = pts.map(p => {
+        if (hasInvalidCategoryId(p)) {
+          delete p.categoryId
+        }
+        return p
+      })
+      const newComposition: ExportableComposition = { backgroundImage: imageSrc, categories: cats, points: newPts }
+      this.push(newComposition)
+      return
+    }
+
+    // Everything is OK
+    const newComposition: ExportableComposition = { backgroundImage: imageSrc, categories: cats, points: pts }
+
+    this.saveComposition()
+    await this.fromExportableComposition(newComposition)
+  }
+
+  @Watch('$store.state.route.query')
+  async onQueryChange (query: string, oldVal: string) {
+    this.processQuery(query)
   }
 }
 </script>

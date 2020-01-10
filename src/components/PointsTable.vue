@@ -34,11 +34,9 @@ export default class PointsTable extends Vue {
   get pointsAsObject () {
     return points.asArray.map(
       p => {
-        const c = categories.get(p.categoryId)
-        const color = c ? c.color : ''
         return {
           ...p,
-          color
+          color: categories.getColor(p.categoryId)
         }
       }
     )

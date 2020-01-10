@@ -70,8 +70,8 @@ export default class Categories extends VuexModule {
   // get has (): (id:string) => boolean {
   //   return (id:string): boolean => this.asMap.has(id)
   // }
-  get getColor (): (id:string) => string {
-    return (id:string): string => this.get(id).color
+  get getColor (): (id: string | undefined) => string {
+    return (id: string | undefined): string => this.get(id || '').color || this.default.color
   }
 
   // Mutations (synchronous)

@@ -87,14 +87,16 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import { getModule } from 'vuex-module-decorators'
-import { ImageSrc } from '@/utils/types.ts'
+import { ExportableComposition, ImageSrc } from '@/utils/types.ts'
 
 import ImageUploaderButton from '@/components/ImageUploaderButton.vue'
 
 import BackgroundImage from '@/store/current/backgroundImage.ts'
+import ExportableCompositions from '@/store/exportableCompositions.ts'
 import GalleryImages from '@/store/galleryImages.ts'
 
 const backgroundImage = getModule(BackgroundImage)
+const exportableCompositions = getModule(ExportableCompositions)
 const galleryImages = getModule(GalleryImages)
 
 @Component({
@@ -117,12 +119,23 @@ export default class Gallery extends Vue {
   }
   set selected (idx: number) {
     const src = this.srcsArray[idx]
-    const image = galleryImages.get(src)
-    const imageSrc = (image && 'localId' in image)
-      ? image.localId
-      : src
-    this.$router.push({ query: { ...this.$store.state.route.query, imageSrc } })
-
+    const c: ExportableComposition | undefined = exportableCompositions.get(src)
+    if (c !== undefined) {
+      this.$router.push({ query: {
+        ...this.$store.state.route.query,
+        imageSrc: c.backgroundImage.localId || c.backgroundImage.src,
+        categories: JSON.stringify(c.categories),
+        points: JSON.stringify(c.points)
+      } })
+    } else {
+      const im: ImageSrc | undefined = galleryImages.get(src)
+      if (im !== undefined) {
+        this.$router.push({ query: {
+          // ...this.$store.state.route.query, // TODO: fix this <-- maybe there are other query parameters that we would want to keep
+          imageSrc: im.localId || im.src
+        } })
+      }
+    }
     // this.$emit('selected')
   }
   addFiles (files: File[]) {

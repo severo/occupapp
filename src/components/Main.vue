@@ -77,13 +77,11 @@ import MainPanel from '@/components/MainPanel.vue'
 
 import BackgroundImage from '@/store/current/backgroundImage.ts'
 import Categories from '@/store/current/categories.ts'
-import Composition from '@/store/current/composition.ts'
 import PointsSelection from '@/store/current/pointsSelection.ts'
 import Points from '@/store/current/points.ts'
 
 const backgroundImage = getModule(BackgroundImage)
 const categories = getModule(Categories)
-const composition = getModule(Composition)
 const pointsSelection = getModule(PointsSelection)
 const points = getModule(Points)
 
@@ -123,9 +121,19 @@ export default class Main extends Vue {
   deleteSelection () {
     points.deleteSet(pointsSelection.asSet)
     pointsSelection.clear()
+    // TODO: not ideal, because the points are updated, then the URL is updated, which will update the points again
+    this.$router.push({ query: {
+      ...this.$store.state.route.query,
+      points: JSON.stringify(points.asArray)
+    } })
   }
   async addPoint () {
     points.postRandom(await categories.nextId())
+    // TODO: not ideal, because the points are updated, then the URL is updated, which will update the points again
+    this.$router.push({ query: {
+      ...this.$store.state.route.query,
+      points: JSON.stringify(points.asArray)
+    } })
   }
 }
 </script>

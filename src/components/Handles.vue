@@ -78,7 +78,11 @@ export default class Handles extends Vue {
 
   // methods
   updateXY (pointId: string, x: number, y: number): void {
-    points.setXY({ id: pointId, x, y })
+    points.setXY({ id: pointId, x, y }) // TODO: not ideal, because the points are updated, then the URL is updated, which will update the points again
+    this.$router.replace({ query: {
+      ...this.$store.state.route.query,
+      points: JSON.stringify(points.asArray)
+    } })
   }
   select (pointId: string):void {
     pointsSelection.add(pointId)
