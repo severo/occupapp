@@ -13,7 +13,8 @@
         :key="idx"
         :x="point.x"
         :y="point.y"
-        @updatexy="updateXY(point.id, $event.x, $event.y)"
+        @updatemovingxy="updateXY(point.id, $event.x, $event.y) /* Note: the URL is not updated during the move */"
+        @updatexy="updateAndPersistXY(point.id, $event.x, $event.y)"
         :selected="isSelected(point.id)"
         @select="select(point.id)"
         @toggle="toggle(point.id)"
@@ -78,11 +79,16 @@ export default class Handles extends Vue {
 
   // methods
   updateXY (pointId: string, x: number, y: number): void {
-    points.setXY({ id: pointId, x, y }) // TODO: not ideal, because the points are updated, then the URL is updated, which will update the points again
-    this.$router.replace({ query: {
-      ...this.$store.state.route.query,
-      points: JSON.stringify(points.asArray)
-    } })
+    points.setXY({ id: pointId, x, y })
+  }
+  updateAndPersistXY (pointId: string, x: number, y: number): void {
+    this.updateXY(pointId, x, y)
+    this.$router.replace({
+      query: {
+        ...this.$store.state.route.query,
+        points: JSON.stringify(points.asArray)
+      }
+    })
   }
   select (pointId: string):void {
     pointsSelection.add(pointId)
