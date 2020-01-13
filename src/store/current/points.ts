@@ -12,8 +12,10 @@ function random10To90 (): number {
   return Math.random() * 80 + 10
 }
 
+// If the domain changes, don't forget to also change the value of MAX_DIGITS
 const xDomain: Domain = [0, 100]
 const yDomain: Domain = [0, 100]
+const MAX_DIGITS = 2
 
 function clampToDomain (z: number, domain: Domain): number {
   if (z < domain[0]) {
@@ -25,9 +27,14 @@ function clampToDomain (z: number, domain: Domain): number {
   return z
 }
 
-function clampPoint (point: Point): Point {
-  point.x = clampToDomain(+point.x, xDomain)
-  point.y = clampToDomain(+point.y, yDomain)
+const MULTIPLIER = Math.pow(10, MAX_DIGITS)
+function restrictPrecision (x: number): number {
+  return Math.round(x * MULTIPLIER) / MULTIPLIER
+}
+
+function clampAndRestrictPrecision (point: Point): Point {
+  point.x = clampToDomain(restrictPrecision(+point.x), xDomain)
+  point.y = clampToDomain(restrictPrecision(+point.y), yDomain)
   return point
 }
 
@@ -76,8 +83,8 @@ export default class Points extends VuexModule {
   }
   @Mutation
   set (point: Point) {
-    // Don't allow positions outside of [0, 100]
-    this.list.set(point.id, clampPoint(point))
+    // Don't allow positions outside of [0, 100] + reduce precision
+    this.list.set(point.id, clampAndRestrictPrecision(point))
     this.listChangeTracker += 1
   }
   @Mutation
