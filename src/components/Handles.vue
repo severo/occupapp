@@ -83,7 +83,7 @@ export default class Handles extends Vue {
   }
   updateAndPersistXY (pointId: string, x: number, y: number): void {
     this.updateXY(pointId, x, y)
-    this.$router.replace({
+    this.$router.push({
       query: {
         ...this.$store.state.route.query,
         points: JSON.stringify(points.asArray)
