@@ -248,6 +248,8 @@ export default class Home extends Vue {
   }
 
   async fromExportableComposition (c: ExportableComposition) {
+    // Add the image to the gallery if it were not in it
+    await galleryImages.setIfNew(c.backgroundImage)
     await backgroundImage.fromImageSrc(c.backgroundImage)
     categories.fromArray(c.categories)
     points.fromArray(c.points)

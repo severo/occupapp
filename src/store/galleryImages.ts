@@ -78,6 +78,12 @@ export default class GalleryImages extends VuexModule {
     this.fromMap(arrayToMap(list))
   }
   @Action
+  setIfNew (imageSrc: ImageSrc) {
+    if (!this.has(imageSrc.src)) {
+      this.set(imageSrc)
+    }
+  }
+  @Action
   appendSrc (src: string) {
     this.set({ src })
   }
