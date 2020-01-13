@@ -56,6 +56,11 @@ export default class BackgroundImage extends VuexModule {
 
   @Action
   async fromImageSrc (imageSrc: ImageSrc) {
+    // only update if needed
+    // TODO: also check srcset, thumbnailSrc and localId?
+    if (imageSrc.src === this.src) {
+      return
+    }
     this.setNotReady()
     this.fromHTMLImageElement(await fetchImage(imageSrc))
     this.setReady()
