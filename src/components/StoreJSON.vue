@@ -7,14 +7,14 @@ import Vue from 'vue'
 import Component from 'vue-class-component'
 import { getModule } from 'vuex-module-decorators'
 
-import ExportableCompositions from '@/store/exportableCompositions.ts'
+import Compositions from '@/store/compositions.ts'
 
-const exportableCompositions = getModule(ExportableCompositions)
+const compositions = getModule(Compositions)
 
 @Component
 export default class StoreJSON extends Vue {
   get jsonString () {
-    return JSON.stringify(exportableCompositions.asArray, null, 2)
+    return JSON.stringify(compositions.asArray, null, 2)
   }
 }
 

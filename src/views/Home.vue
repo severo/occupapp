@@ -102,11 +102,11 @@ import Main from '@/components/Main.vue'
 
 import { validateImageSrc } from '@/utils/img.ts'
 import { goTo } from '@/utils/router.ts'
-import { Category, ExportableComposition, ImageSrc, Point } from '@/utils/types.ts'
+import { Category, Composition, ImageSrc, Point } from '@/utils/types.ts'
 
 import BackgroundImage from '@/store/current/backgroundImage.ts'
 import Categories from '@/store/current/categories.ts'
-import ExportableCompositions from '@/store/exportableCompositions.ts'
+import Compositions from '@/store/compositions.ts'
 import GalleryImages from '@/store/galleryImages.ts'
 import Points from '@/store/current/points.ts'
 import PointsMetrics from '@/store/current/pointsMetrics.ts'
@@ -114,7 +114,7 @@ import PointsSelection from '@/store/current/pointsSelection.ts'
 
 const backgroundImage = getModule(BackgroundImage)
 const categories = getModule(Categories)
-const exportableCompositions = getModule(ExportableCompositions)
+const compositions = getModule(Compositions)
 const galleryImages = getModule(GalleryImages)
 const points = getModule(Points)
 const pointsMetrics = getModule(PointsMetrics)
@@ -230,16 +230,16 @@ export default class Home extends Vue {
   }
 
   saveComposition () {
-    // Save the current composition to exportableCompositions
+    // Save the current composition to compositions
     const c = {
       backgroundImage: backgroundImage.imageSrc,
       categories: categories.asArray,
       points: points.asArray
     }
-    exportableCompositions.set(c)
+    compositions.set(c)
   }
 
-  async fromExportableComposition (c: ExportableComposition) {
+  async fromComposition (c: Composition) {
     // Add the image to the gallery if it were not in it
     await galleryImages.setIfNew(c.backgroundImage)
     await backgroundImage.fromImageSrc(c.backgroundImage)
@@ -258,13 +258,13 @@ export default class Home extends Vue {
     if (imageSrc === undefined) {
       // imageSrc should have been valid
       // first option to fix it: load a saved composition for the current background image
-      const c: ExportableComposition | undefined = exportableCompositions.get(backgroundImage.src)
+      const c: Composition | undefined = compositions.get(backgroundImage.src)
       if (c !== undefined) {
         goTo(c)
         return
       }
       // second option: load the default composition
-      const defaultComposition: ExportableComposition = { backgroundImage: { src: galleryImages.defaultSrc }, categories: categories.defaultArray, points: [] }
+      const defaultComposition: Composition = { backgroundImage: { src: galleryImages.defaultSrc }, categories: categories.defaultArray, points: [] }
       goTo(defaultComposition)
       return
     }
@@ -273,13 +273,13 @@ export default class Home extends Vue {
     if (cats === undefined) {
       // categories should have been valid
       // first option to fix them: load an existing composition for imageSrc and restore it
-      const c: ExportableComposition | undefined = exportableCompositions.get(imageSrc.src)
+      const c: Composition | undefined = compositions.get(imageSrc.src)
       if (c !== undefined) {
         goTo(c)
         return
       }
       // second option: create a new composition for imageSrc and load it
-      const newComposition: ExportableComposition = { backgroundImage: imageSrc, categories: categories.defaultArray, points: [] }
+      const newComposition: Composition = { backgroundImage: imageSrc, categories: categories.defaultArray, points: [] }
       goTo(newComposition)
       return
     }
@@ -288,13 +288,13 @@ export default class Home extends Vue {
     if (pts === undefined) {
       // points should have been valid
       // first option to fix them: load an existing composition for imageSrc and restore it
-      const c: ExportableComposition | undefined = exportableCompositions.get(imageSrc.src)
+      const c: Composition | undefined = compositions.get(imageSrc.src)
       if (c !== undefined) {
         goTo(c)
         return
       }
       // second option: create a new composition for imageSrc and categories, and load it
-      const newComposition: ExportableComposition = { backgroundImage: imageSrc, categories: cats, points: [] }
+      const newComposition: Composition = { backgroundImage: imageSrc, categories: cats, points: [] }
       goTo(newComposition)
       return
     }
@@ -309,16 +309,16 @@ export default class Home extends Vue {
         }
         return p
       })
-      const newComposition: ExportableComposition = { backgroundImage: imageSrc, categories: cats, points: newPts }
+      const newComposition: Composition = { backgroundImage: imageSrc, categories: cats, points: newPts }
       goTo(newComposition)
       return
     }
 
     // Everything is OK
-    const newComposition: ExportableComposition = { backgroundImage: imageSrc, categories: cats, points: pts }
+    const newComposition: Composition = { backgroundImage: imageSrc, categories: cats, points: pts }
 
     this.saveComposition()
-    await this.fromExportableComposition(newComposition)
+    await this.fromComposition(newComposition)
   }
 
   @Watch('$store.state.route.query')

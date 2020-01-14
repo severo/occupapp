@@ -1,5 +1,5 @@
 import { getModule } from 'vuex-module-decorators'
-import { ExportableComposition, ImageSrc } from '@/utils/types.ts'
+import { Composition, ImageSrc } from '@/utils/types.ts'
 import router from '@/router'
 import GalleryImages from '@/store/galleryImages.ts'
 import BackgroundImage from '@/store/current/backgroundImage.ts'
@@ -23,7 +23,7 @@ export const persistState = () => {
   }
 }
 
-export const goTo = (c: ExportableComposition) => {
+export const goTo = (c: Composition) => {
   router.push({
     query: {
       imageSrc: c.backgroundImage.localId || c.backgroundImage.src,

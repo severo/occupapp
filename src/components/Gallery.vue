@@ -87,17 +87,17 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import { getModule } from 'vuex-module-decorators'
-import { ExportableComposition, ImageSrc } from '@/utils/types.ts'
+import { Composition, ImageSrc } from '@/utils/types.ts'
 import { goTo } from '@/utils/router.ts'
 
 import ImageUploaderButton from '@/components/ImageUploaderButton.vue'
 
 import BackgroundImage from '@/store/current/backgroundImage.ts'
-import ExportableCompositions from '@/store/exportableCompositions.ts'
+import Compositions from '@/store/compositions.ts'
 import GalleryImages from '@/store/galleryImages.ts'
 
 const backgroundImage = getModule(BackgroundImage)
-const exportableCompositions = getModule(ExportableCompositions)
+const compositions = getModule(Compositions)
 const galleryImages = getModule(GalleryImages)
 
 @Component({
@@ -120,7 +120,7 @@ export default class Gallery extends Vue {
   }
   set selected (idx: number) {
     const src = this.srcsArray[idx]
-    const c: ExportableComposition | undefined = exportableCompositions.get(src)
+    const c: Composition | undefined = compositions.get(src)
     if (c !== undefined) {
       goTo(c)
     } else {

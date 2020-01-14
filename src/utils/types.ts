@@ -31,7 +31,7 @@ export interface Category extends Color {
 }
 
 // Compositions
-export interface ExportableComposition {
+export interface Composition {
   backgroundImage: ImageSrc;
   points: Point[];
   categories: Category[];
