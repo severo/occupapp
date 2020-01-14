@@ -14,7 +14,7 @@
         :x="point.x"
         :y="point.y"
         @updatemovingxy="updateXY(point.id, $event.x, $event.y) /* Note: the URL is not updated during the move */"
-        @updatexy="updateAndPersistXY(point.id, $event.x, $event.y)"
+        @updatexy="updateXYAndPersist(point.id, $event.x, $event.y)"
         :selected="isSelected(point.id)"
         @select="select(point.id)"
         @toggle="toggle(point.id)"
@@ -33,7 +33,7 @@ import Component from 'vue-class-component'
 import { Prop } from 'vue-property-decorator'
 import { getModule } from 'vuex-module-decorators'
 import { Point } from '@/utils/types.ts'
-import { persistState } from '@/utils/router.ts'
+import { goToCurrentComposition } from '@/utils/urlQuery.ts'
 
 import FilterShadow2 from '@/components/FilterShadow2.vue'
 import FilterShadow8 from '@/components/FilterShadow8.vue'
@@ -80,11 +80,13 @@ export default class Handles extends Vue {
 
   // methods
   updateXY (pointId: string, x: number, y: number): void {
+    // Only update the inner state (don't update the URL)
     points.setXY({ id: pointId, x, y })
   }
-  updateAndPersistXY (pointId: string, x: number, y: number): void {
-    this.updateXY(pointId, x, y)
-    persistState()
+  updateXYAndPersist (pointId: string, x: number, y: number): void {
+    // Update the URL after the point has been updated
+    points.setXY({ id: pointId, x, y })
+    goToCurrentComposition()
   }
   select (pointId: string):void {
     pointsSelection.add(pointId)

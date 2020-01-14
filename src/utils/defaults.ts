@@ -1,5 +1,8 @@
-import { ImageSrc } from '@/utils/types.ts'
+import * as d3 from 'd3'
+import { Category, ImageSpec, Point } from '@/utils/types.ts'
+import uuid from 'uuid'
 
+// Images
 function forgeUrl (name: string, width: number): string {
   return `https://github.com/severo/pictures/raw/master/images,w_${width}/${name}.jpg`
 }
@@ -20,7 +23,7 @@ const sortedWidth: number[] = [...widths].sort((a: number, b: number): number =>
 const minWidth: number = sortedWidth[0]
 const maxWidth: number = sortedWidth[sortedWidth.length - 1]
 
-const imageSrcs: ImageSrc[] = names.map(name => {
+const defaultImageSpecs: ImageSpec[] = names.map(name => {
   return {
     src: forgeUrl(name, maxWidth),
     srcset: widths.map(w => `${forgeUrl(name, w)} ${w}w`).join(','),
@@ -28,4 +31,13 @@ const imageSrcs: ImageSrc[] = names.map(name => {
   }
 })
 
-export { imageSrcs }
+// Categories
+const defaultPalette = [d3.rgb(255, 195, 8), d3.rgb(172, 159, 253), d3.rgb(181, 246, 66), d3.rgb(239, 106, 222)]
+const defaultCategories: Category[] = defaultPalette.map(c => {
+  return { id: uuid.v4(), color: c.hex() }
+})
+
+// Points
+const defaultPoints: Point[] = []
+
+export { defaultImageSpecs, defaultCategories, defaultPoints }

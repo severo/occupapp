@@ -5,13 +5,13 @@
       app
       right
       disable-resize-watcher
-      :mobile-break-point="2*barWidth"
+      :mobile-break-point="2 * barWidth"
       :width="barWidth"
     >
       <v-toolbar light>
         <v-btn
           icon
-          @click="drawer=false"
+          @click="drawer = false"
         >
           <v-icon>
             mdi-exit-to-app
@@ -100,23 +100,16 @@ import ImagesPanel from '@/components/ImagesPanel.vue'
 import Infos from '@/components/Infos.vue'
 import Main from '@/components/Main.vue'
 
-import { validateImageSrc } from '@/utils/img.ts'
-import { goTo } from '@/utils/router.ts'
-import { Category, Composition, ImageSrc, Point } from '@/utils/types.ts'
+import { Composition, UrlQuery } from '@/utils/types.ts'
+import { parse } from '@/utils/urlQuery.ts'
 
 import BackgroundImage from '@/store/current/backgroundImage.ts'
-import Categories from '@/store/current/categories.ts'
 import Compositions from '@/store/compositions.ts'
-import GalleryImages from '@/store/galleryImages.ts'
-import Points from '@/store/current/points.ts'
 import PointsMetrics from '@/store/current/pointsMetrics.ts'
 import PointsSelection from '@/store/current/pointsSelection.ts'
 
 const backgroundImage = getModule(BackgroundImage)
-const categories = getModule(Categories)
 const compositions = getModule(Compositions)
-const galleryImages = getModule(GalleryImages)
-const points = getModule(Points)
 const pointsMetrics = getModule(PointsMetrics)
 const pointsSelection = getModule(PointsSelection)
 
@@ -152,7 +145,7 @@ export default class Home extends Vue {
     this.small = this.$vuetify.breakpoint.thresholds.md * 0.5
     this.barWidth = this.small
 
-    // Init the composition
+    // Process the query
     this.processQuery(this.$store.state.route.query)
   }
 
@@ -165,173 +158,34 @@ export default class Home extends Vue {
     }
   }
 
-  async parseImageSrc (query: any): Promise<ImageSrc | undefined> {
-    // First: ensure there is an imageSrc
-    if ('imageSrc' in query && typeof query.imageSrc === 'string') {
-      const parsed = query.imageSrc
+  async processQuery (query: UrlQuery) {
+    // Note: the "parse" method is allowed to reroute to a different URL to fix parameters
+    const composition: Composition | undefined = await parse(query)
+    if (composition !== undefined) {
+      // A new composition has been parsed successfully from the query
 
-      // is it already in the gallery?
-      const im: ImageSrc | undefined = galleryImages.get(parsed)
-      if (im !== undefined) {
-        return im
-      }
-
-      // or is it a valid image URL?
-      const newIm: ImageSrc = { src: parsed }
-      if (await validateImageSrc(newIm)) {
-        return newIm
-      }
+      // Clear the temporary state data
+      pointsSelection.clear()
+      // Set the composition
+      compositions.setCurrent(composition)
+      // Update the cached state data
+      await backgroundImage.fromImageSpec(compositions.current.backgroundImage)
+      pointsMetrics.clear()
     }
   }
 
-  parseCategories (query: any): Category[] | undefined {
-    // First: ensure there is a categories field
-    if ('categories' in query && typeof query.categories === 'string') {
-      const parsed = JSON.parse(query.categories)
-      const arr: Category[] = []
-      if (Array.isArray(parsed)) {
-        for (const c of parsed) {
-          // TODO: add more validation (uuid length? color formats?)
-          if ('id' in c && 'color' in c && typeof c.id === 'string' && typeof c.color === 'string') {
-            arr.push({ id: c.id, color: c.color })
-          }
-        }
-        return arr
-        // in any other case: returns undefined
-      }
-    }
-  }
-
-  parsePoints (query: any): Point[] | undefined {
-    // First: ensure there is a categories field
-    if ('categories' in query && typeof query.points === 'string') {
-      const parsed = JSON.parse(query.points)
-      const arr: Point[] = []
-      if (Array.isArray(parsed)) {
-        for (const p of parsed) {
-          // TODO: add more validation
-          if ('id' in p && typeof p.id === 'string' &&
-            'number' in p && typeof p.number === 'number' &&
-            'x' in p && typeof p.x === 'number' &&
-            'y' in p && typeof p.y === 'number'
-          ) {
-            const newPoint = { id: p.id, number: p.number, x: p.x, y: p.y }
-            if ('categoryId' in p && typeof p.categoryId === 'string') {
-              arr.push({ ...newPoint, categoryId: p.categoryId })
-            } else {
-              arr.push(newPoint)
-            }
-          }
-        }
-        return arr
-        // in any other case: returns undefined
-      }
-    }
-  }
-
-  saveComposition () {
-    // Save the current composition to compositions
-    const c = {
-      backgroundImage: backgroundImage.imageSrc,
-      categories: categories.asArray,
-      points: points.asArray
-    }
-    compositions.set(c)
-  }
-
-  async fromComposition (c: Composition) {
-    // Add the image to the gallery if it were not in it
-    await galleryImages.setIfNew(c.backgroundImage)
-    await backgroundImage.fromImageSrc(c.backgroundImage)
-    categories.fromArray(c.categories)
-    points.fromArray(c.points)
-    pointsMetrics.clear()
-    pointsSelection.clear()
-  }
-
-  async processQuery (query: string) {
-    // The query arguments are parsed and validated in order: imageSrc, then categories, then points.
-    // If an argument is invalid, it's fixed and the URL is modified (the process stops here)
-    // Else, if all arguments are OK, the state is updated
-
-    const imageSrc: ImageSrc | undefined = await this.parseImageSrc(query)
-    if (imageSrc === undefined) {
-      // imageSrc should have been valid
-      // first option to fix it: load a saved composition for the current background image
-      const c: Composition | undefined = compositions.get(backgroundImage.src)
-      if (c !== undefined) {
-        goTo(c)
-        return
-      }
-      // second option: load the default composition
-      const defaultComposition: Composition = { backgroundImage: { src: galleryImages.defaultSrc }, categories: categories.defaultArray, points: [] }
-      goTo(defaultComposition)
-      return
-    }
-
-    const cats: Category[] | undefined = this.parseCategories(query)
-    if (cats === undefined) {
-      // categories should have been valid
-      // first option to fix them: load an existing composition for imageSrc and restore it
-      const c: Composition | undefined = compositions.get(imageSrc.src)
-      if (c !== undefined) {
-        goTo(c)
-        return
-      }
-      // second option: create a new composition for imageSrc and load it
-      const newComposition: Composition = { backgroundImage: imageSrc, categories: categories.defaultArray, points: [] }
-      goTo(newComposition)
-      return
-    }
-
-    const pts: Point[] | undefined = this.parsePoints(query)
-    if (pts === undefined) {
-      // points should have been valid
-      // first option to fix them: load an existing composition for imageSrc and restore it
-      const c: Composition | undefined = compositions.get(imageSrc.src)
-      if (c !== undefined) {
-        goTo(c)
-        return
-      }
-      // second option: create a new composition for imageSrc and categories, and load it
-      const newComposition: Composition = { backgroundImage: imageSrc, categories: cats, points: [] }
-      goTo(newComposition)
-      return
-    }
-
-    // If some points refer to a non-existing category, remove it and reload
-    const catsIds = cats.map(c => c.id)
-    const hasInvalidCategoryId = (p: Point): boolean => (p.categoryId !== undefined) && (!catsIds.includes(p.categoryId))
-    if (pts.some(hasInvalidCategoryId)) {
-      const newPts = pts.map(p => {
-        if (hasInvalidCategoryId(p)) {
-          delete p.categoryId
-        }
-        return p
-      })
-      const newComposition: Composition = { backgroundImage: imageSrc, categories: cats, points: newPts }
-      goTo(newComposition)
-      return
-    }
-
-    // Everything is OK
-    const newComposition: Composition = { backgroundImage: imageSrc, categories: cats, points: pts }
-
-    this.saveComposition()
-    await this.fromComposition(newComposition)
-  }
-
+  // Query changes are watched inside the Home view, because the query is specific to this view
   @Watch('$store.state.route.query')
-  async onQueryChange (query: string, oldVal: string) {
+  async onQueryChange (query: UrlQuery, oldVal: UrlQuery) {
     this.processQuery(query)
   }
 }
 </script>
 
 <style lang="sass">
-  .v-content
-    height: 100vh
-  #keep .v-app-bar .title
-    color: inherit
-    text-decoration: none
+.v-content
+  height: 100vh
+#keep .v-app-bar .title
+  color: inherit
+  text-decoration: none
 </style>

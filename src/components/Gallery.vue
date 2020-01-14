@@ -9,7 +9,7 @@
         class="images-row"
       >
         <v-col
-          v-for="(imageSrc,i) in imageSrcsArray"
+          v-for="(imageSpec, i) in imageSpecs"
           :key="i"
           cols="auto"
         >
@@ -17,8 +17,8 @@
             v-slot:default="{ active, toggle }"
           >
             <v-img
-              :src="imageSrc.thumbnailSrc || imageSrc.src"
-              :srcset="imageSrc.srcset"
+              :src="imageSpec.thumbnailSrc || imageSpec.src"
+              :srcset="imageSpec.srcset"
               class="grey lighten-2 text-right pa-2"
               width="64px"
               height="64px"
@@ -87,17 +87,15 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import { getModule } from 'vuex-module-decorators'
-import { Composition, ImageSrc } from '@/utils/types.ts'
-import { goTo } from '@/utils/router.ts'
+import { ImageSpec } from '@/utils/types.ts'
+import { goToImageSpec } from '@/utils/urlQuery.ts'
 
 import ImageUploaderButton from '@/components/ImageUploaderButton.vue'
 
 import BackgroundImage from '@/store/current/backgroundImage.ts'
-import Compositions from '@/store/compositions.ts'
 import GalleryImages from '@/store/galleryImages.ts'
 
 const backgroundImage = getModule(BackgroundImage)
-const compositions = getModule(Compositions)
 const galleryImages = getModule(GalleryImages)
 
 @Component({
@@ -106,38 +104,18 @@ const galleryImages = getModule(GalleryImages)
   }
 })
 export default class Gallery extends Vue {
-  get imageSrcs (): Map<string, ImageSrc> {
-    return galleryImages.asMap
-  }
-  get imageSrcsArray (): ImageSrc[] {
-    return [...this.imageSrcs.values()]
-  }
-  get srcsArray (): string[] {
-    return [...this.imageSrcs.keys()]
+  get imageSpecs (): ImageSpec[] {
+    return galleryImages.asArray
   }
   get selected (): number {
-    return this.srcsArray.indexOf(backgroundImage.src)
+    return this.imageSpecs.findIndex(spec => spec.src === backgroundImage.src)
   }
   set selected (idx: number) {
-    const src = this.srcsArray[idx]
-    const c: Composition | undefined = compositions.get(src)
-    if (c !== undefined) {
-      goTo(c)
-    } else {
-      const im: ImageSrc | undefined = galleryImages.get(src)
-      if (im !== undefined) {
-        goTo({
-          backgroundImage: im,
-          categories: [],
-          points: []
-        })
-      } else {
-        throw new RangeError(`Background image ${src} not found in the gallery.`)
-      }
-    }
+    // Update the URL with the selected image.
+    goToImageSpec(this.imageSpecs[idx])
   }
   addFiles (files: File[]) {
-    galleryImages.appendFilesArray(files)
+    galleryImages.appendFromFiles(files)
     files = []
   }
 }

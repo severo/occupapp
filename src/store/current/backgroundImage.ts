@@ -2,7 +2,7 @@
 
 // See https://championswimmer.in/vuex-module-decorators/
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
-import { ImageSrc } from '@/utils/types.ts'
+import { ImageSpec } from '@/utils/types.ts'
 import { fetchImage } from '@/utils/img.ts'
 
 import store from '@/store'
@@ -11,6 +11,7 @@ import store from '@/store'
 export default class BackgroundImage extends VuexModule {
   // State - state of truth - meant to be exported as a JSON - init definitions
   image: HTMLImageElement = new Image()
+  imageSpec: ImageSpec = { src: '' }
   isReady: boolean = false
   // TODO: add thumbnailSrc?
 
@@ -27,12 +28,6 @@ export default class BackgroundImage extends VuexModule {
   get srcset (): string {
     return this.image.srcset
   }
-  get imageSrc (): ImageSrc {
-    return {
-      src: this.image.src,
-      srcset: this.image.srcset
-    }
-  }
 
   get aspectRatio (): number {
     if (this.naturalHeight === 0) {
@@ -42,8 +37,9 @@ export default class BackgroundImage extends VuexModule {
   }
 
   @Mutation
-  fromHTMLImageElement (image: HTMLImageElement) {
+  setImage (image: HTMLImageElement, imageSpec: ImageSpec) {
     this.image = image
+    this.imageSpec = imageSpec
   }
   @Mutation
   setNotReady () {
@@ -55,14 +51,14 @@ export default class BackgroundImage extends VuexModule {
   }
 
   @Action
-  async fromImageSrc (imageSrc: ImageSrc) {
+  async fromImageSpec (imageSpec: ImageSpec) {
     // only update if needed
     // TODO: also check srcset, thumbnailSrc and localId?
-    if (imageSrc.src === this.src) {
+    if (imageSpec.src === this.src) {
       return
     }
     this.setNotReady()
-    this.fromHTMLImageElement(await fetchImage(imageSrc))
+    this.setImage(await fetchImage(imageSpec), imageSpec)
     this.setReady()
   }
 }

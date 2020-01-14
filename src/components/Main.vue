@@ -72,7 +72,7 @@ import Vue from 'vue'
 import Component from 'vue-class-component'
 import { getModule } from 'vuex-module-decorators'
 import { mdiPlus } from '@mdi/js'
-import { persistState } from '@/utils/router.ts'
+import { goToCurrentComposition } from '@/utils/urlQuery.ts'
 
 import MainPanel from '@/components/MainPanel.vue'
 
@@ -122,11 +122,13 @@ export default class Main extends Vue {
   deleteSelection () {
     points.deleteSet(pointsSelection.asSet)
     pointsSelection.clear()
-    persistState()
+    // Update the URL after deleting the points
+    goToCurrentComposition()
   }
-  async addPoint () {
-    points.postRandom(await categories.nextId())
-    persistState()
+  addPoint () {
+    points.postRandom(categories.asArray[points.size % categories.size].id)
+    // Update the URL after adding the point
+    goToCurrentComposition()
   }
 }
 </script>

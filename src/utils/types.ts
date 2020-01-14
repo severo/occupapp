@@ -1,38 +1,62 @@
 // Images
-export interface ImageSrc {
-    src: string;
-    srcset?: string;
-    thumbnailSrc?: string;
-    localId?: string;
+export interface ImageSpec {
+  src: string
+  srcset?: string
+  thumbnailSrc?: string
+  localId?: string
 }
 
 // Points
 export interface XY {
-  x: number;
-  y: number;
+  x: number
+  y: number
 }
 export interface XYId extends XY {
-  id: string;
+  id: string
 }
 export interface XYCategory extends XY {
-  categoryId?: string;
+  categoryId: string
 }
 export interface Point extends XYCategory {
-  id: string;
-  number: number;
+  id: string
+  number: number
 }
 
 // Categories
 export interface Color {
-  color: string;
+  color: string
 }
 export interface Category extends Color {
-  id: string;
+  id: string
 }
 
 // Compositions
 export interface Composition {
-  backgroundImage: ImageSrc;
-  points: Point[];
-  categories: Category[];
+  id: string
+  backgroundImage: ImageSpec
+  points: Point[]
+  categories: Category[]
 }
+
+// URL Query Specification (the data required to forge an URL query)
+export interface UrlQuerySpec {
+  img: UrlQuerySpecImg
+  pts?: UrlQuerySpecPt[]
+  cats?: UrlQuerySpecCat[]
+}
+export type UrlQuerySpecImg = string
+export interface UrlQuerySpecPt {
+  id: string
+  n: number
+  x: number
+  y: number
+  c: string
+}
+export interface UrlQuerySpecCat {
+  id: string
+  c: string
+}
+
+// Copied from vue-router
+type Dictionary < T > = { [key: string]: T }
+export type UrlQuery = Dictionary<string | (string | null)[] | null | undefined>

@@ -1,11 +1,11 @@
-import { ImageSrc } from '@/utils/types.ts'
+import { ImageSpec } from '@/utils/types.ts'
 
-// TODO fix a small height and width initially to avoid loading the heaviest image, if srcset exists (responsive image)? is this how onload works?
+// TODO set a small height and width initially to avoid loading the heaviest image, if srcset exists (responsive image)? is this how onload works?
 // TODO should we also generate a thumbnail?
 export async function fetchImage ({
   src,
   srcset
-}: ImageSrc): Promise<HTMLImageElement> {
+}: ImageSpec): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img: HTMLImageElement = new Image()
     img.onload = () => resolve(img)
@@ -17,7 +17,7 @@ export async function fetchImage ({
   })
 }
 
-export async function validateImageSrc ({ src, srcset }: ImageSrc): Promise<boolean> {
+export async function validateImageSpec ({ src, srcset }: ImageSpec): Promise<boolean> {
   return fetchImage({ src, srcset }).then(() => true).catch(() => false)
 }
 
