@@ -72,6 +72,7 @@ import Vue from 'vue'
 import Component from 'vue-class-component'
 import { getModule } from 'vuex-module-decorators'
 import { mdiPlus } from '@mdi/js'
+import { persistState } from '@/utils/router.ts'
 
 import MainPanel from '@/components/MainPanel.vue'
 
@@ -121,19 +122,11 @@ export default class Main extends Vue {
   deleteSelection () {
     points.deleteSet(pointsSelection.asSet)
     pointsSelection.clear()
-    // TODO: not ideal, because the points are updated, then the URL is updated, which will update the points again
-    this.$router.push({ query: {
-      ...this.$store.state.route.query,
-      points: JSON.stringify(points.asArray)
-    } })
+    persistState()
   }
   async addPoint () {
     points.postRandom(await categories.nextId())
-    // TODO: not ideal, because the points are updated, then the URL is updated, which will update the points again
-    this.$router.push({ query: {
-      ...this.$store.state.route.query,
-      points: JSON.stringify(points.asArray)
-    } })
+    persistState()
   }
 }
 </script>

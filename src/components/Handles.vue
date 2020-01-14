@@ -33,6 +33,7 @@ import Component from 'vue-class-component'
 import { Prop } from 'vue-property-decorator'
 import { getModule } from 'vuex-module-decorators'
 import { Point } from '@/utils/types.ts'
+import { persistState } from '@/utils/router.ts'
 
 import FilterShadow2 from '@/components/FilterShadow2.vue'
 import FilterShadow8 from '@/components/FilterShadow8.vue'
@@ -83,12 +84,7 @@ export default class Handles extends Vue {
   }
   updateAndPersistXY (pointId: string, x: number, y: number): void {
     this.updateXY(pointId, x, y)
-    this.$router.push({
-      query: {
-        ...this.$store.state.route.query,
-        points: JSON.stringify(points.asArray)
-      }
-    })
+    persistState()
   }
   select (pointId: string):void {
     pointsSelection.add(pointId)

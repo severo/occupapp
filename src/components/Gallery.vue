@@ -88,6 +88,7 @@ import Vue from 'vue'
 import Component from 'vue-class-component'
 import { getModule } from 'vuex-module-decorators'
 import { ExportableComposition, ImageSrc } from '@/utils/types.ts'
+import { goTo } from '@/utils/router.ts'
 
 import ImageUploaderButton from '@/components/ImageUploaderButton.vue'
 
@@ -121,22 +122,19 @@ export default class Gallery extends Vue {
     const src = this.srcsArray[idx]
     const c: ExportableComposition | undefined = exportableCompositions.get(src)
     if (c !== undefined) {
-      this.$router.push({ query: {
-        ...this.$store.state.route.query,
-        imageSrc: c.backgroundImage.localId || c.backgroundImage.src,
-        categories: JSON.stringify(c.categories),
-        points: JSON.stringify(c.points)
-      } })
+      goTo(c)
     } else {
       const im: ImageSrc | undefined = galleryImages.get(src)
       if (im !== undefined) {
-        this.$router.push({ query: {
-          // ...this.$store.state.route.query, // TODO: fix this <-- maybe there are other query parameters that we would want to keep
-          imageSrc: im.localId || im.src
-        } })
+        goTo({
+          backgroundImage: im,
+          categories: [],
+          points: []
+        })
+      } else {
+        throw new RangeError(`Background image ${src} not found in the gallery.`)
       }
     }
-    // this.$emit('selected')
   }
   addFiles (files: File[]) {
     galleryImages.appendFilesArray(files)
