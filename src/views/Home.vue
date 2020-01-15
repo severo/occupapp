@@ -43,6 +43,13 @@
         </v-btn>
         <v-btn
           icon
+          @click="view = 'collaboration'"
+          :disabled="view === 'collaboration'"
+        >
+          <v-icon>mdi-forum</v-icon>
+        </v-btn>
+        <v-btn
+          icon
           @click="toggleFullscreen()"
           v-if="$vuetify.breakpoint.smAndUp"
         >
@@ -55,6 +62,7 @@
         <PointsList v-if="view === 'points'" />
         <ImagesPanel v-if="view === 'images'" />
         <TablesPanel v-if="view === 'tables'" />
+        <CollaborationPanel v-if="view === 'collaboration'" />
       </v-container>
 
       <template v-slot:append>
@@ -94,6 +102,7 @@ import Component from 'vue-class-component'
 import { Watch } from 'vue-property-decorator'
 import { getModule } from 'vuex-module-decorators'
 
+import CollaborationPanel from '@/components/CollaborationPanel.vue'
 import PointsList from '@/components/PointsList.vue'
 import TablesPanel from '@/components/TablesPanel.vue'
 import ImagesPanel from '@/components/ImagesPanel.vue'
@@ -115,6 +124,7 @@ const pointsSelection = getModule(PointsSelection)
 
 @Component({
   components: {
+    CollaborationPanel,
     PointsList,
     TablesPanel,
     ImagesPanel,

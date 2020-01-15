@@ -7,10 +7,15 @@ export default class Settings extends VuexModule {
   // State - state of truth - meant to be exported as a JSON - init definitions
 
   showImageColors: boolean = true
+  isCollaborationActive: boolean = false
 
   // Mutations (synchronous)
   @Mutation
   setShowImageColors (value: boolean) {
+    this.showImageColors = value
+  }
+  @Mutation
+  activateCollaboration (value: boolean) {
     this.showImageColors = value
   }
 }
