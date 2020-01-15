@@ -5,6 +5,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import Component from 'vue-class-component'
+import { Prop } from 'vue-property-decorator'
 import { getModule } from 'vuex-module-decorators'
 
 import Compositions from '@/store/compositions.ts'
@@ -13,8 +14,11 @@ const compositions = getModule(Compositions)
 
 @Component
 export default class StoreJSON extends Vue {
+  // props
+  @Prop({ default: {} }) readonly json!: any
+
   get jsonString () {
-    return JSON.stringify(compositions.asArray, null, 2)
+    return JSON.stringify(this.json, null, 2)
   }
 }
 
