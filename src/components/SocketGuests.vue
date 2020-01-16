@@ -1,8 +1,6 @@
 <template>
   <v-container>
     <v-list subheader>
-      <v-subheader>Me</v-subheader>
-
       <v-list-item>
         <v-list-item-icon>
           <v-icon :color="guest.color">
@@ -11,13 +9,13 @@
         </v-list-item-icon>
 
         <v-list-item-content>
-          <v-text-field v-model="guestName" />
-          <!-- <v-list-item-title v-text="guest.name" /> -->
+          <v-text-field
+            v-model="guestName"
+            label="Enter your name"
+          />
         </v-list-item-content>
       </v-list-item>
     </v-list>
-
-    <v-divider />
 
     <v-list
       subheader

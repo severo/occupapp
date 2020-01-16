@@ -2,7 +2,7 @@
   <div class="px-2">
     <v-switch
       v-model="isCollaborationActive"
-      label="Connect to collaboration room"
+      label="Connect to the collaboration room"
     />
     <div v-if="isCollaborationActive && isConnected">
       <h3 class="title mt-4 mb-2">
@@ -10,10 +10,12 @@
       </h3>
       <SocketGuests />
       <p class="overline">
-        Also join our <a
+        Also join the <a
           target="_blank"
           href="https://meet.jit.si/occupappbeta"
-        >Jitsi room</a> for more interactions.
+        >Jitsi room<v-icon
+          style="color: currentColor; fontSize: 0.7rem"
+        >mdi-open-in-new</v-icon></a> for more interaction.
       </p>
     </div>
     <div v-else-if="isCollaborationActive && !isConnected">
