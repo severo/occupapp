@@ -1,5 +1,5 @@
 // See https://championswimmer.in/vuex-module-decorators/
-import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
+import { Action, Module, Mutation, VuexModule, getModule } from 'vuex-module-decorators'
 import io from 'socket.io-client'
 import nanoid from 'nanoid'
 import store from '@/store'
@@ -43,3 +43,6 @@ export default class Socket extends VuexModule {
     this.updateGuests([])
   }
 }
+
+const socketStore = getModule(Socket)
+window.addEventListener('beforeunload', socketStore.disconnect)
