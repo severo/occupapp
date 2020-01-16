@@ -9,6 +9,12 @@
         Welcome to the collaboration room
       </h3>
       <SocketGuests />
+      <p class="overline">
+        Also join our <a
+          target="_blank"
+          href="https://meet.jit.si/occupappbeta"
+        >Jitsi room</a> for more interactions.
+      </p>
     </div>
     <div v-else-if="isCollaborationActive && !isConnected">
       <h3 class="title mt-4 mb-2">

@@ -19,7 +19,10 @@
 
     <v-divider />
 
-    <v-list subheader>
+    <v-list
+      subheader
+      v-if="otherGuests.length > 0"
+    >
       <v-subheader>Other guests</v-subheader>
 
       <v-list-item
@@ -36,6 +39,12 @@
           <v-list-item-title v-text="item.name" />
         </v-list-item-content>
       </v-list-item>
+    </v-list>
+    <v-list
+      subheader
+      v-else
+    >
+      <v-subheader>You're the only guest in the room</v-subheader>
     </v-list>
   </v-container>
 </template>
