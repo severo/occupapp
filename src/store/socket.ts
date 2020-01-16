@@ -5,7 +5,9 @@ import nanoid from 'nanoid'
 import store from '@/store'
 import { Guest } from '@/types'
 
-const socket: SocketIOClient.Socket = io('http://localhost:3000/occupapp-beta', { autoConnect: false })
+// const socket: SocketIOClient.Socket = io('http://localhost:3000/occupapp-beta', { autoConnect: false })
+const socket: SocketIOClient.Socket = io('https://immense-coast-15741.herokuapp.com/occupapp-beta', { autoConnect: false })
+
 const guest = { name: nanoid(5) }
 
 @Module({ dynamic: true, store, name: 'socket', namespaced: true })
@@ -32,7 +34,6 @@ export default class Socket extends VuexModule {
       this.setGuest(g)
     })
     this.socket.on('list-guests', (guests: Guest[]) => {
-      console.log(guests)
       this.setGuests(guests)
     })
   }
