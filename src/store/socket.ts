@@ -1,31 +1,44 @@
 // See https://championswimmer.in/vuex-module-decorators/
-import { Module, Mutation, VuexModule } from 'vuex-module-decorators'
+import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
+import io from 'socket.io-client'
 import store from '@/store'
 import { Guest } from '@/types'
 
+const socket: SocketIOClient.Socket = io('http://localhost:3000/occupapp-beta', { autoConnect: false })
+const guest = { name: `Guest_${new Date().getTime()}` }
+
 @Module({ dynamic: true, store, name: 'socket', namespaced: true })
-export default class Settings extends VuexModule {
+export default class Socket extends VuexModule {
   // State - state of truth - meant to be exported as a JSON - init definitions
 
-  socket: SocketIOClient.Socket | undefined = undefined
+  socket: SocketIOClient.Socket = socket
+  guest: Guest = guest
+  guests: Guest[] = []
 
-  get isConnected (): boolean {
-    return this.socket === undefined
-  }
-  get serverUrl (): URL {
-    // 'https://immense-coast-15741.herokuapp.com/'
-    const base = 'http://localhost:3000/'
-    // will throw a ReferenceError exception if the URL is incorrect
-    return new URL(base)
-  }
-
-  // Mutations (synchronous)
   @Mutation
-  setSocket (socket: SocketIOClient.Socket) {
-    this.socket = socket
+  updateGuest (guest: Guest) {
+    this.guest = guest
   }
   @Mutation
-  deleteSocket () {
-    this.socket = undefined
+  updateGuests (guests: Guest[]) {
+    this.guests = guests
+  }
+
+  @Action
+  connect () {
+    this.socket.connect()
+    this.socket.emit('new-guest', guest, (g: Guest) => {
+      this.updateGuest(g)
+    })
+    this.socket.on('list-guests', (guests: Guest[]) => {
+      this.updateGuests(guests)
+    })
+  }
+  @Action
+  disconnect () {
+    this.socket.emit('bye-bye')
+    this.socket.disconnect()
+    this.updateGuest(guest)
+    this.updateGuests([])
   }
 }
