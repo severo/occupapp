@@ -14,7 +14,7 @@ import Handsontable from 'handsontable'
 
 import { HotTable } from '@handsontable/vue'
 
-import { Category } from '@/utils/types.ts'
+import { Category } from '@/types'
 
 import Categories from '@/store/current/categories.ts'
 

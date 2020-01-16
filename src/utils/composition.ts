@@ -1,4 +1,4 @@
-import { Category, Composition, ImageSpec, Point, UrlQuerySpec, UrlQuerySpecPt, UrlQuerySpecCat } from '@/utils/types.ts'
+import { Category, Composition, ImageSpec, Point, UrlQuerySpec, UrlQuerySpecPt, UrlQuerySpecCat } from '@/types'
 import { defaultCategories, defaultPoints } from '@/utils/defaults.ts'
 
 const pointToUrlQuerySpecPt = (p: Point): UrlQuerySpecPt => {

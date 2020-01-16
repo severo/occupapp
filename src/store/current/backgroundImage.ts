@@ -2,7 +2,7 @@
 
 // See https://championswimmer.in/vuex-module-decorators/
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
-import { ImageSpec } from '@/utils/types.ts'
+import { ImageSpec } from '@/types'
 import { fetchImage } from '@/utils/img.ts'
 
 import store from '@/store'

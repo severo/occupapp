@@ -1,4 +1,4 @@
-import { ImageSpec } from '@/utils/types.ts'
+import { ImageSpec } from '@/types'
 
 // TODO set a small height and width initially to avoid loading the heaviest image, if srcset exists (responsive image)? is this how onload works?
 // TODO should we also generate a thumbnail?

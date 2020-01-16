@@ -1,3 +1,5 @@
+import { Route } from 'vue-router/types/router'
+
 // Images
 export interface ImageSpec {
   src: string
@@ -57,6 +59,11 @@ export interface UrlQuerySpecCat {
   c: string
 }
 
-// Copied from vue-router
-type Dictionary < T > = { [key: string]: T }
-export type UrlQuery = Dictionary<string | (string | null)[] | null | undefined>
+export type UrlQuery = Route['query']
+
+// Collaboration
+export interface Guest {
+  name: string
+  sId?: SocketIOClient.Socket['id']
+  color?: string
+}

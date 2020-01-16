@@ -109,7 +109,7 @@ import ImagesPanel from '@/components/ImagesPanel.vue'
 import Infos from '@/components/Infos.vue'
 import Main from '@/components/Main.vue'
 
-import { Composition, UrlQuery } from '@/utils/types.ts'
+import { Composition, UrlQuery } from '@/types'
 import { parse } from '@/utils/urlQuery.ts'
 
 import BackgroundImage from '@/store/current/backgroundImage.ts'

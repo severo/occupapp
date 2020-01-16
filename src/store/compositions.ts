@@ -1,7 +1,7 @@
 // See https://championswimmer.in/vuex-module-decorators/
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import store from '@/store'
-import { Composition, Category, ImageSpec, Point } from '@/utils/types.ts'
+import { Composition, Category, ImageSpec, Point } from '@/types'
 import { fieldsToComposition } from '@/utils/composition.ts'
 
 import {

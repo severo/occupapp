@@ -1,5 +1,5 @@
 import * as d3 from 'd3'
-import { Category, ImageSpec, Point } from '@/utils/types.ts'
+import { Category, ImageSpec, Point } from '@/types'
 import uuid from 'uuid'
 
 // Images

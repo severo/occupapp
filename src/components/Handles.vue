@@ -32,7 +32,7 @@ import Vue from 'vue'
 import Component from 'vue-class-component'
 import { Prop } from 'vue-property-decorator'
 import { getModule } from 'vuex-module-decorators'
-import { Point } from '@/utils/types.ts'
+import { Point } from '@/types'
 import { goToCurrentComposition } from '@/utils/urlQuery.ts'
 
 import FilterShadow2 from '@/components/FilterShadow2.vue'

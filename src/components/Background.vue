@@ -33,7 +33,7 @@ import { getModule } from 'vuex-module-decorators'
 import { Prop, Watch } from 'vue-property-decorator'
 import { Delaunay } from 'd3-delaunay'
 import * as d3 from 'd3'
-import { Point } from '@/utils/types.ts'
+import { Point } from '@/types'
 
 import ImageCacheCanvas from '@/components/ImageCacheCanvas.vue'
 

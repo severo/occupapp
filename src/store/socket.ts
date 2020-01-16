@@ -1,6 +1,7 @@
 // See https://championswimmer.in/vuex-module-decorators/
 import { Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import store from '@/store'
+import { Guest } from '@/types'
 
 @Module({ dynamic: true, store, name: 'socket', namespaced: true })
 export default class Settings extends VuexModule {

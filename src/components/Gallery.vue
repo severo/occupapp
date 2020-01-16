@@ -87,7 +87,7 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import { getModule } from 'vuex-module-decorators'
-import { ImageSpec } from '@/utils/types.ts'
+import { ImageSpec } from '@/types'
 import { goToImageSpec } from '@/utils/urlQuery.ts'
 
 import ImageUploaderButton from '@/components/ImageUploaderButton.vue'

@@ -7,7 +7,7 @@ import {
   ImageSpec,
   Point,
   UrlQuery
-} from '@/utils/types.ts'
+} from '@/types'
 import { validateImageSpec } from '@/utils/img.ts'
 import { goTo } from '@/utils/router.ts'
 import {

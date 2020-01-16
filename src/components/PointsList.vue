@@ -50,7 +50,7 @@ import Component from 'vue-class-component'
 import { getModule } from 'vuex-module-decorators'
 import { Prop, Watch } from 'vue-property-decorator'
 
-import { Point } from '@/utils/types.ts'
+import { Point } from '@/types'
 
 import Categories from '@/store/current/categories.ts'
 import Points from '@/store/current/points.ts'

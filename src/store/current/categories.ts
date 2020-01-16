@@ -4,7 +4,7 @@
 import { Action, Module, VuexModule, getModule } from 'vuex-module-decorators'
 import store from '@/store'
 import uuid from 'uuid'
-import { Color, Category } from '@/utils/types.ts'
+import { Color, Category } from '@/types'
 
 import Compositions from '@/store/compositions.ts'
 const compositions = getModule(Compositions)

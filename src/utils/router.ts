@@ -1,4 +1,4 @@
-import { UrlQuery, UrlQuerySpec } from '@/utils/types.ts'
+import { UrlQuery, UrlQuerySpec } from '@/types'
 import router from '@/router'
 import {} from 'vue-router'
 

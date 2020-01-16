@@ -2,7 +2,7 @@
 import uuid from 'uuid'
 import { Action, Module, VuexModule, getModule } from 'vuex-module-decorators'
 import store from '@/store'
-import { ImageSpec } from '@/utils/types.ts'
+import { ImageSpec } from '@/types'
 import { getImageUrl } from '@/utils/img.ts'
 
 import Compositions from '@/store/compositions.ts'
