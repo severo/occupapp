@@ -5,10 +5,13 @@ import nanoid from 'nanoid'
 import store from '@/store'
 import { Guest } from '@/types'
 
-// const socket: SocketIOClient.Socket = io('http://localhost:3000/occupapp-beta', { autoConnect: false })
-const socket: SocketIOClient.Socket = io('https://immense-coast-15741.herokuapp.com/occupapp-beta', { autoConnect: false })
 
 const guest = { name: nanoid(5) }
+// By default: use a local server (https://github.com/LyonDataViz/socket-server/)
+// in a development environment, else a remote server
+// TODO: make it easier to switch the server
+const serverUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:3000/occupapp-beta' : 'https://immense-coast-15741.herokuapp.com/occupapp-beta'
+const socket: SocketIOClient.Socket = io(serverUrl, { autoConnect: false })
 
 @Module({ dynamic: true, store, name: 'socket', namespaced: true })
 export default class Socket extends VuexModule {
