@@ -116,11 +116,13 @@ import BackgroundImage from '@/store/current/backgroundImage.ts'
 import Compositions from '@/store/compositions.ts'
 import PointsMetrics from '@/store/current/pointsMetrics.ts'
 import PointsSelection from '@/store/current/pointsSelection.ts'
+import Socket from '@/store/socket.ts'
 
 const backgroundImage = getModule(BackgroundImage)
 const compositions = getModule(Compositions)
 const pointsMetrics = getModule(PointsMetrics)
 const pointsSelection = getModule(PointsSelection)
+const socket = getModule(Socket)
 
 @Component({
   components: {
@@ -178,6 +180,8 @@ export default class Home extends Vue {
       pointsSelection.clear()
       // Set the composition
       compositions.setCurrent(composition)
+      // Send the composition to the socket
+      socket.updateComposition(compositions.current)
       // Update the cached state data
       await backgroundImage.fromImageSpec(compositions.current.backgroundImage)
       pointsMetrics.clear()

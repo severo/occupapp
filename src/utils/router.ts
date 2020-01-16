@@ -1,6 +1,5 @@
 import { UrlQuery, UrlQuerySpec } from '@/types'
 import router from '@/router'
-import {} from 'vue-router'
 
 const specToQuery = (query: UrlQuerySpec): UrlQuery => {
   const q: UrlQuery = { img: query.img }
