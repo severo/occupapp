@@ -1,12 +1,12 @@
 // See https://championswimmer.in/vuex-module-decorators/
 import { Action, Module, Mutation, VuexModule, getModule } from 'vuex-module-decorators'
 import io from 'socket.io-client'
-import nanoid from 'nanoid'
 import store from '@/store'
 import { Guest } from '@/types'
 
+import Settings from '@/store/settings.ts'
 
-const guest = { name: nanoid(5) }
+const settings = getModule(Settings, store)
 // By default: use a local server (https://github.com/LyonDataViz/socket-server/)
 // in a development environment, else a remote server
 // TODO: make it easier to switch the server
@@ -18,8 +18,12 @@ export default class Socket extends VuexModule {
   // State - state of truth - meant to be exported as a JSON - init definitions
 
   socket: SocketIOClient.Socket = socket
-  guest: Guest = guest
+  guest: Guest = this.defaultGuest
   guests: Guest[] = []
+
+  get defaultGuest (): Guest {
+    return { name: settings.me }
+  }
 
   @Mutation
   setGuest (guest: Guest) {
@@ -31,26 +35,36 @@ export default class Socket extends VuexModule {
   }
 
   @Action
+  syncGuest (guest: Guest) {
+    this.setGuest(guest)
+    if (guest.name !== settings.me) {
+      settings.setMe(guest.name)
+    }
+  }
+  @Action
   connect () {
     this.socket.connect()
-    this.socket.emit('new-guest', guest, (g: Guest) => {
-      this.setGuest(g)
+    this.socket.emit('new-guest', this.guest, (g: Guest) => {
+      this.syncGuest(g)
     })
     this.socket.on('list-guests', (guests: Guest[]) => {
       this.setGuests(guests)
+      // TODO: should we also update this.guest? On one hand, the server could
+      // send a different version of the guest. On the other hand, maybe the
+      // 'list-guests' is more about listing the "other" guests.
     })
   }
   @Action
   disconnect () {
     this.socket.emit('bye-bye')
     this.socket.disconnect()
-    this.setGuest(guest)
+    this.syncGuest(this.defaultGuest)
     this.setGuests([])
   }
   @Action
   updateGuest (guest: Guest) {
     this.socket.emit('update-guest', guest, (g: Guest) => {
-      this.setGuest(g)
+      this.syncGuest(g)
     })
   }
 }
