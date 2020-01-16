@@ -17,11 +17,11 @@ export default class Socket extends VuexModule {
   guests: Guest[] = []
 
   @Mutation
-  updateGuest (guest: Guest) {
+  setGuest (guest: Guest) {
     this.guest = guest
   }
   @Mutation
-  updateGuests (guests: Guest[]) {
+  setGuests (guests: Guest[]) {
     this.guests = guests
   }
 
@@ -29,18 +29,25 @@ export default class Socket extends VuexModule {
   connect () {
     this.socket.connect()
     this.socket.emit('new-guest', guest, (g: Guest) => {
-      this.updateGuest(g)
+      this.setGuest(g)
     })
     this.socket.on('list-guests', (guests: Guest[]) => {
-      this.updateGuests(guests)
+      console.log(guests)
+      this.setGuests(guests)
     })
   }
   @Action
   disconnect () {
     this.socket.emit('bye-bye')
     this.socket.disconnect()
-    this.updateGuest(guest)
-    this.updateGuests([])
+    this.setGuest(guest)
+    this.setGuests([])
+  }
+  @Action
+  updateGuest (guest: Guest) {
+    this.socket.emit('update-guest', guest, (g: Guest) => {
+      this.setGuest(g)
+    })
   }
 }
 
