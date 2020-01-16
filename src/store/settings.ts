@@ -15,7 +15,11 @@ export default class Settings extends VuexModule {
     this.showImageColors = value
   }
   @Mutation
-  activateCollaboration (value: boolean) {
-    this.showImageColors = value
+  enableCollaboration () {
+    this.isCollaborationActive = true
+  }
+  @Mutation
+  disableCollaboration () {
+    this.isCollaborationActive = false
   }
 }

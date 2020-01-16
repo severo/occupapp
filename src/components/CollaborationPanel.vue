@@ -1,6 +1,5 @@
 <template>
   <v-container>
-    <!-- <Gallery /> -->
     <v-switch
       v-model="isCollaborationActive"
       label="Connect to collaboration room (not implemented yet)"
@@ -15,6 +14,8 @@ import Vue from 'vue'
 import Component from 'vue-class-component'
 import { getModule } from 'vuex-module-decorators'
 
+import { connect, disconnect } from '@/utils/socket.ts'
+
 import Settings from '@/store/settings.ts'
 
 const settings = getModule(Settings)
@@ -28,22 +29,17 @@ export default class CollaborationPanel extends Vue {
     this.toggleCollaboration()
   }
 
-  async toggleCollaboration () {
+  toggleCollaboration () {
     if (settings.isCollaborationActive === true) {
-      // Disconnect
-      await this.disconnect()
-      settings.activateCollaboration(false)
+      settings.disableCollaboration()
+      // Disconnect the socket
+      disconnect()
     } else {
-      await this.connect()
-      settings.activateCollaboration(true)
+      // TODO: add a loader icon + a message in case the connection fails (or is lost)
+      // Establish connection
+      connect()
+      settings.enableCollaboration()
     }
-  }
-
-  async connect () {
-    // Establish connection
-  }
-  async disconnect () {
-    // Establish connection
   }
 }
 </script>
