@@ -63,7 +63,7 @@ export type UrlQuery = Route['query']
 
 // Collaboration
 export interface Guest {
-  name: string
   sId?: SocketIOClient.Socket['id']
+  name?: string
   color?: string
 }

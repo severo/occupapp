@@ -41,9 +41,11 @@ import PointHandle from '@/components/PointHandle.vue'
 
 import Points from '@/store/current/points.ts'
 import PointsSelection from '@/store/current/pointsSelection.ts'
+import Socket from '@/store/socket.ts'
 
 const points = getModule(Points)
 const pointsSelection = getModule(PointsSelection)
+const socket = getModule(Socket)
 
 @Component({
   components: {
@@ -82,11 +84,23 @@ export default class Handles extends Vue {
   updateXY (pointId: string, x: number, y: number): void {
     // Only update the inner state (don't update the URL)
     points.setXY({ id: pointId, x, y })
+    // Send to the socket server
+    socket.change(this.getSocketCallback(pointId, x, y))
   }
   updateXYAndPersist (pointId: string, x: number, y: number): void {
     // Update the URL after the point has been updated
     points.setXY({ id: pointId, x, y })
+    // Send to the socket server
+    socket.change(this.getSocketCallback(pointId, x, y))
     goToCurrentComposition()
+  }
+  // TODO: don't use any type
+  getSocketCallback (pointId: string, x: number, y: number): any {
+    // TODO: don't use any type
+    return (doc: any) => {
+      doc.composition.points[pointId].x = x
+      doc.composition.points[pointId].y = y
+    }
   }
   select (pointId: string):void {
     pointsSelection.add(pointId)

@@ -65,20 +65,20 @@ export default class SocketGuests extends Vue {
   debounceTimer: number = 0
 
   get otherGuests (): Guest[] {
-    return socketStore.guests.filter(g => g.sId !== this.guest.sId)
+    return socketStore.otherGuests
   }
   get guest (): Guest {
     return socketStore.guest
   }
   get guestName (): string {
-    return this.guest.name
+    return this.guest.name || 'No name'
   }
   set guestName (name: string) {
     clearTimeout(this.debounceTimer)
     this.debounceTimer = window.setTimeout(() => {
       // Note how we use an arrow function to get access to the "this" object
       // See https://stackoverflow.com/a/38737108/7351594
-      socketStore.updateGuest({ ...this.guest, name })
+      socketStore.updateGuestName(name)
     }, 1000) // 1 second to be sure the socket update loop does not interfere
     // when the user types (and there is no urgency in propagating the name
     // update)

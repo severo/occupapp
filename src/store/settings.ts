@@ -1,14 +1,14 @@
 // See https://championswimmer.in/vuex-module-decorators/
 import { Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import createPersistedState from 'vuex-persistedstate'
-import nanoid from 'nanoid'
 import store from '@/store'
 
 @Module({ dynamic: true, store, name: 'settings', namespaced: true })
 export default class Settings extends VuexModule {
   // State - state of truth - meant to be exported as a JSON - init definitions
 
-  me: string = nanoid(5)
+  // TODO: add color too
+  me: string = ''
   showImageColors: boolean = true
   isCollaborationActive: boolean = false
 
