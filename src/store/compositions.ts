@@ -52,9 +52,6 @@ export default class Compositions extends VuexModule {
   get asArray (): Composition[] {
     return [...this.asMap.values()]
   }
-  get size (): number {
-    return this.asMap.size
-  }
   get get (): (id: string) => Composition | undefined {
     return (id: string): Composition | undefined => this.asMap.get(id)
   }
@@ -68,24 +65,11 @@ export default class Compositions extends VuexModule {
     }
     return c
   }
-  // USE?
-  // get keys (): IterableIterator<string> {
-  //   return this.asMap.keys()
-  // }
-  // get values (): IterableIterator<Point> {
-  //   return this.asMap.values()
-  // }
   get has (): (id: string) => boolean {
     return (id: string): boolean => this.asMap.has(id)
   }
 
   // Mutations (synchronous)
-  @Mutation
-  fromMap (list: Map<string, Composition>) {
-    this.list = list
-    // Trigger Vue updates
-    this.listChangeTracker += 1
-  }
   @Mutation
   set (c: Composition) {
     this.list.set(c.id, c)
@@ -94,11 +78,6 @@ export default class Compositions extends VuexModule {
   @Mutation
   setCurrentId (id: string) {
     this.currentId = id
-  }
-  @Mutation
-  delete (id: string) {
-    this.list.delete(id)
-    this.listChangeTracker += 1
   }
   // Actions
   // Important: actions only receive 1 argument (payload). If you want to
@@ -111,22 +90,6 @@ export default class Compositions extends VuexModule {
     this.setCurrentId(composition.id)
   }
 
-  @Action
-  fromArray (list: Composition[]) {
-    this.fromMap(new Map(list.map(c => [c.id, c])))
-  }
-  @Action
-  clear () {
-    this.fromMap(new Map())
-  }
-  @Action
-  deleteSet (ids: Set<string>) {
-    const newList: Map<string, Composition> = new Map(this.asMap)
-    for (const id of ids) {
-      newList.delete(id)
-    }
-    this.fromMap(newList)
-  }
   @Action
   appendFromImageSpec (imageSpec: ImageSpec) {
     // Nothing to do if a composition already exists with the same identifier

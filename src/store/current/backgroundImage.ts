@@ -25,9 +25,6 @@ export default class BackgroundImage extends VuexModule {
   get src (): string {
     return this.image.src
   }
-  get srcset (): string {
-    return this.image.srcset
-  }
 
   get aspectRatio (): number {
     if (this.naturalHeight === 0) {

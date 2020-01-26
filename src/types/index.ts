@@ -9,27 +9,20 @@ export interface ImageSpec {
 }
 
 // Points
-export interface XY {
+export interface XYId {
+  id: string
   x: number
   y: number
 }
-export interface XYId extends XY {
-  id: string
-}
-export interface XYCategory extends XY {
-  categoryId: string
-}
-export interface Point extends XYCategory {
-  id: string
+export interface Point extends XYId {
   number: number
+  categoryId: string
 }
 
 // Categories
-export interface Color {
-  color: string
-}
-export interface Category extends Color {
+export interface Category {
   id: string
+  color: string
 }
 
 // Compositions

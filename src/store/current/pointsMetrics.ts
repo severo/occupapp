@@ -49,28 +49,11 @@ export default class PointsMetrics extends VuexModule {
     this.areas.set(area.pointId, area)
     this.areasChangeTracker += 1
   }
-  @Mutation
-  deleteArea (pointId: string) {
-    this.areas.delete(pointId)
-    this.areasChangeTracker += 1
-  }
   // Actions
   // Important: actions only receive 1 argument (payload). If you want to
   // receive various arguments -> fields of an Object
   @Action
-  areasFromArray (areas: Area[]) {
-    this.areasFromMap(new Map(areas.map(p => [p.pointId, p])))
-  }
-  @Action
   clear () {
     this.areasFromMap(new Map())
-  }
-  @Action
-  deleteSet (ids: Set<string>) {
-    const newList: Map<string, Area> = new Map(this.areasAsMap)
-    for (const id of ids) {
-      newList.delete(id)
-    }
-    this.areasFromMap(newList)
   }
 }

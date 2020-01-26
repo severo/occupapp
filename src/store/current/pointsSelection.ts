@@ -28,13 +28,6 @@ export default class PointsSelection extends VuexModule {
   get has (): (id:string) => boolean {
     return (id:string): boolean => this.asSet.has(id)
   }
-  // USE?
-  // get keys (): IterableIterator<string> {
-  //   return this.asSet.keys()
-  // }
-  // get values (): IterableIterator<string> {
-  //   return this.asSet.values()
-  // }
 
   // Mutations (synchronous)
   @Mutation

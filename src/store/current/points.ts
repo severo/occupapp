@@ -4,7 +4,7 @@
 import { Action, Module, VuexModule, getModule } from 'vuex-module-decorators'
 import store from '@/store'
 import uuid from 'uuid'
-import { Point, XYCategory, XYId } from '@/types'
+import { Point, XYId } from '@/types'
 
 import Compositions from '@/store/compositions.ts'
 const compositions = getModule(Compositions)
@@ -57,9 +57,6 @@ export default class Points extends VuexModule {
   get size (): number {
     return this.asMap.size
   }
-  get get (): (id: string) => Point | undefined {
-    return (id: string): Point | undefined => this.asMap.get(id)
-  }
   get nextNumber (): number {
     // the first free integer (there might be gaps between points numbers)
     // the points are ordered by number
@@ -88,14 +85,6 @@ export default class Points extends VuexModule {
     ])
   }
   @Action
-  clear () {
-    this.setPoints([])
-  }
-  @Action
-  post (p: XYCategory) {
-    this.setPoint({ id: uuid.v4(), ...p, number: this.nextNumber })
-  }
-  @Action
   deleteSet (ids: Set<string>) {
     this.setPoints(this.asArray.filter(p => !ids.has(p.id)))
   }
@@ -109,11 +98,7 @@ export default class Points extends VuexModule {
     }
   }
   @Action
-  postCenter (categoryId: string) {
-    this.post({ x: 50, y: 50, categoryId })
-  }
-  @Action
   postRandom (categoryId: string) {
-    this.post({ x: random10To90(), y: random10To90(), categoryId })
+    this.setPoint({ id: uuid.v4(), number: this.nextNumber, x: random10To90(), y: random10To90(), categoryId })
   }
 }

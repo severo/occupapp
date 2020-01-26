@@ -77,13 +77,11 @@ import { Point } from '@/types'
 
 import MainPanel from '@/components/MainPanel.vue'
 
-import BackgroundImage from '@/store/current/backgroundImage.ts'
 import Categories from '@/store/current/categories.ts'
 import PointsSelection from '@/store/current/pointsSelection.ts'
 import Points from '@/store/current/points.ts'
 import Socket from '@/store/socket.ts'
 
-const backgroundImage = getModule(BackgroundImage)
 const categories = getModule(Categories)
 const pointsSelection = getModule(PointsSelection)
 const points = getModule(Points)

@@ -35,21 +35,11 @@ export default class GalleryImages extends VuexModule {
   // Important: actions only receive 1 argument (payload). If you want to
   // receive various arguments -> fields of an Object
   @Action
-  async appendFromImageSpec (imageSpec: ImageSpec) {
-    compositions.appendFromImageSpec(imageSpec)
-  }
-  @Action
-  async appendFromImageSpecs (imageSpecs: ImageSpec[]) {
-    for (const imageSpec of imageSpecs) {
-      this.appendFromImageSpec(imageSpec)
-    }
-  }
-  @Action
   async appendFromFiles (files: File[]) {
     for (const f of files) {
       const base64Str = await getImageUrl(f)
       if (base64Str !== '') {
-        this.appendFromImageSpec({ src: base64Str, localId: `local:${uuid.v4()}` })
+        compositions.appendFromImageSpec({ src: base64Str, localId: `local:${uuid.v4()}` })
       }
     }
   }
