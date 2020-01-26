@@ -183,7 +183,7 @@ export default class Home extends Vue {
       // Send the composition to the socket
       socket.updateComposition(compositions.current)
       // Update the cached state data
-      await backgroundImage.fromImageSpec(compositions.current.backgroundImage)
+      await backgroundImage.refresh()
       pointsMetrics.clear()
     }
   }

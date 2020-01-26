@@ -1,19 +1,18 @@
 // Current background image
 
 // See https://championswimmer.in/vuex-module-decorators/
-import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
-import { ImageSpec } from '@/types'
+import { Action, Module, Mutation, VuexModule, getModule } from 'vuex-module-decorators'
 import { fetchImage } from '@/utils/img.ts'
-
 import store from '@/store'
+
+import Compositions from '@/store/compositions.ts'
+const compositions = getModule(Compositions)
 
 @Module({ dynamic: true, store, name: 'backgroundImage', namespaced: true })
 export default class BackgroundImage extends VuexModule {
   // State - state of truth - meant to be exported as a JSON - init definitions
   image: HTMLImageElement = new Image()
-  imageSpec: ImageSpec = { src: '' }
   isReady: boolean = false
-  // TODO: add thumbnailSrc?
 
   // Getters - cached, not meant to be exported
   get naturalWidth (): number {
@@ -34,9 +33,8 @@ export default class BackgroundImage extends VuexModule {
   }
 
   @Mutation
-  setImage (image: HTMLImageElement, imageSpec: ImageSpec) {
+  setImage (image: HTMLImageElement) {
     this.image = image
-    this.imageSpec = imageSpec
   }
   @Mutation
   setNotReady () {
@@ -48,14 +46,9 @@ export default class BackgroundImage extends VuexModule {
   }
 
   @Action
-  async fromImageSpec (imageSpec: ImageSpec) {
-    // only update if needed
-    // TODO: also check srcset, thumbnailSrc and localId?
-    if (imageSpec.src === this.src) {
-      return
-    }
+  async refresh () {
     this.setNotReady()
-    this.setImage(await fetchImage(imageSpec), imageSpec)
+    this.setImage(await fetchImage(compositions.current.backgroundImage))
     this.setReady()
   }
 }
