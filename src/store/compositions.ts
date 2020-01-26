@@ -94,8 +94,8 @@ export default class Compositions extends VuexModule {
   appendFromImageSpec (imageSpec: ImageSpec) {
     // Nothing to do if a composition already exists with the same identifier
     // TODO: alternatives: replace it, merge it, or append it to an array of multiple compositions for the same image
-    const mode: string = 'ignore'
-    if (this.has(imageSpec.src) && mode === 'ignore') {
+    const mode: string = 'ignoreIfExists'
+    if (this.has(imageSpec.src) && mode === 'ignoreIfExists') {
       return
     }
 
