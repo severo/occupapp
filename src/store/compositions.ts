@@ -41,8 +41,7 @@ const defaultCompositions = initFromDefaults(
   defaultPoints
 )
 
-// TODO: select a random composition?
-const initialId = defaultCompositions[0].id
+const initialId = defaultCompositions[Math.floor(Math.random() * defaultCompositions.length)].id
 
 @Module({ dynamic: true, store, name: 'compositions', namespaced: true })
 export default class Compositions extends VuexModule {
