@@ -34,7 +34,7 @@ export async function validateImageSpec ({ src, srcset }: ImageSpec): Promise<bo
 export async function getImageUrl (
   file: File,
   maxWidth: number | undefined = 999999
-) {
+): Promise<string> {
   return readOrientation(file).then(orientation => {
     return applyRotation(file, orientation || 1, maxWidth)
   }

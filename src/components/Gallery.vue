@@ -89,13 +89,16 @@ import Component from 'vue-class-component'
 import { getModule } from 'vuex-module-decorators'
 import { ImageSpec } from '@/types'
 import { goToImageSpec } from '@/utils/urlQuery.ts'
+import { getImageUrl } from '@/utils/img.ts'
 
 import ImageUploaderButton from '@/components/ImageUploaderButton.vue'
 
 import BackgroundImage from '@/store/current/backgroundImage.ts'
+import Compositions from '@/store/compositions.ts'
 import GalleryImages from '@/store/galleryImages.ts'
 
 const backgroundImage = getModule(BackgroundImage)
+const compositions = getModule(Compositions)
 const galleryImages = getModule(GalleryImages)
 
 @Component({
@@ -114,8 +117,16 @@ export default class Gallery extends Vue {
     // Update the URL with the selected image.
     goToImageSpec(this.imageSpecs[idx])
   }
-  addFiles (files: File[]) {
-    galleryImages.appendFromFiles(files)
+  async addFiles (files: File[]) {
+    // Actions
+    // Important: actions only receive 1 argument (payload). If you want to
+    // receive various arguments -> fields of an Object
+    for (const f of files) {
+      const dataUrl: string = await getImageUrl(f)
+      if (dataUrl !== '') {
+        compositions.appendFromDataUrl(dataUrl)
+      }
+    }
     files = []
   }
 }

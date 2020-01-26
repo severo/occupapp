@@ -1,5 +1,6 @@
 // See https://championswimmer.in/vuex-module-decorators/
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
+import uuid from 'uuid'
 import store from '@/store'
 import { Composition, Category, ImageSpec, Point } from '@/types'
 import { fieldsToComposition } from '@/utils/composition.ts'
@@ -91,15 +92,14 @@ export default class Compositions extends VuexModule {
   }
 
   @Action
-  appendFromImageSpec (imageSpec: ImageSpec) {
+  appendFromDataUrl (dataUrl: string) {
     // Nothing to do if a composition already exists with the same identifier
     // TODO: alternatives: replace it, merge it, or append it to an array of multiple compositions for the same image
     const mode: string = 'ignoreIfExists'
-    if (this.has(imageSpec.src) && mode === 'ignoreIfExists') {
+    if (this.has(dataUrl) && mode === 'ignoreIfExists') {
       return
     }
-
-    this.set(fieldsToComposition(imageSpec))
+    this.set(fieldsToComposition({ src: dataUrl, localId: `local:${uuid.v4()}` }))
   }
   @Action
   setCurrentPoints (points: Point[]) {

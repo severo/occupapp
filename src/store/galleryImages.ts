@@ -1,9 +1,7 @@
 // See https://championswimmer.in/vuex-module-decorators/
-import uuid from 'uuid'
-import { Action, Module, VuexModule, getModule } from 'vuex-module-decorators'
+import { Module, VuexModule, getModule } from 'vuex-module-decorators'
 import store from '@/store'
 import { ImageSpec } from '@/types'
-import { getImageUrl } from '@/utils/img.ts'
 
 import Compositions from '@/store/compositions.ts'
 const compositions = getModule(Compositions)
@@ -29,18 +27,5 @@ export default class GalleryImages extends VuexModule {
   }
   get get (): (id:string) => ImageSpec | undefined {
     return (id:string): ImageSpec | undefined => this.asMap.get(id)
-  }
-
-  // Actions
-  // Important: actions only receive 1 argument (payload). If you want to
-  // receive various arguments -> fields of an Object
-  @Action
-  async appendFromFiles (files: File[]) {
-    for (const f of files) {
-      const base64Str = await getImageUrl(f)
-      if (base64Str !== '') {
-        compositions.appendFromImageSpec({ src: base64Str, localId: `local:${uuid.v4()}` })
-      }
-    }
   }
 }
