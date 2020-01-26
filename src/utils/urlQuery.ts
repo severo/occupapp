@@ -1,65 +1,30 @@
 // Methods to manage the URL query string
-import { getModule } from 'vuex-module-decorators'
-
 import {
   Category,
   Composition,
-  ImageSpec,
   Point,
   UrlQuery
 } from '@/types'
-import { validateImageSpec } from '@/utils/img.ts'
-import { goTo } from '@/utils/router.ts'
-import {
-  compositionToUrlQuerySpec,
-  fieldsToComposition
-} from '@/utils/composition.ts'
+import { fieldsToComposition } from '@/utils/composition.ts'
 
-import Compositions from '@/store/compositions.ts'
-import GalleryImages from '@/store/galleryImages.ts'
-
-const compositions = getModule(Compositions)
-const galleryImages = getModule(GalleryImages)
-
-export const goToImageSpec = (imageSpec: ImageSpec) => {
-  const c: Composition | undefined = compositions.getByImageSpec(imageSpec)
-  if (c === undefined) {
-    goToComposition(fieldsToComposition(imageSpec))
-  } else {
-    goToComposition(c)
+const parseId = (
+  query: UrlQuery
+): string | undefined => {
+  // First: ensure there is an img parameter
+  if (query.id !== undefined && typeof query.id === 'string') {
+    return query.id
   }
 }
-
-export const goToComposition = (c: Composition) => {
-  goTo(compositionToUrlQuerySpec(c))
-}
-
-export const goToCurrentComposition = () => {
-  goToComposition(compositions.current)
-}
-
 // Check the img parameter in the query
 // It can be:
 // - an image src, eg: `https://github.com/severo/pictures/raw/master/images,w_1920/petanque.jpg`
-// - a local identifier, eg: `local:55188aa7-cf93-47ed-a083-56b627e835c4`
-const parseImageSpec = async (
+// - a base64 data URL, eg: `data:image/jpeg;base64,/9j/4AAQSkZJR...`
+const parseImageSpec = (
   query: UrlQuery
-): Promise<ImageSpec | undefined> => {
+): string | undefined => {
   // First: ensure there is an img parameter
   if (query.img !== undefined && typeof query.img === 'string') {
-    const imageId: string = query.img
-
-    // is it already in the gallery?
-    const im: ImageSpec | undefined = galleryImages.get(imageId)
-    if (im !== undefined) {
-      return im
-    }
-
-    // or is it a valid image URL?
-    const newIm: ImageSpec = { src: imageId }
-    if (await validateImageSpec(newIm)) {
-      return newIm
-    }
+    return query.img
   }
 }
 
@@ -108,47 +73,31 @@ const parsePoints = (query: UrlQuery): Point[] | undefined => {
   }
 }
 
-export const parse = async (query: UrlQuery): Promise<Composition | undefined> => {
-  // The query arguments are parsed and validated in order: imageSpec, then categories, then points.
-  // If an argument is invalid, it's fixed and the URL is modified (the process stops here)
-  // Else, if all arguments are OK, the state is updated
-
-  const imageSpec: ImageSpec | undefined = await parseImageSpec(query)
-  if (imageSpec === undefined) {
-    goToCurrentComposition()
-    return
-  }
-
+export const parse = (query: UrlQuery): Composition | undefined => {
+  const id: string | undefined = parseId(query)
+  const src: string | undefined = parseImageSpec(query)
   const cats: Category[] | undefined = parseCategories(query)
-  if (cats === undefined) {
-    // categories should have been valid
-    // first option to fix them: load an existing composition for imageSpec and restore it
-    // second option: create a new composition for imageSpec with default values and load it
-    goToComposition(
-      compositions.getByImageSpec(imageSpec) || fieldsToComposition(imageSpec)
-    )
-    return
-  }
-
   const pts: Point[] | undefined = parsePoints(query)
-  if (pts === undefined) {
-    // points should have been valid
-    // first option to fix them: load an existing composition for imageSpec and restore it
-    // second option: create a new composition for imageSpec and categories, and load it
-    goToComposition(
-      compositions.getByImageSpec(imageSpec) || fieldsToComposition(imageSpec, cats)
-    )
+  if (id === undefined && src === undefined && cats === undefined && pts === undefined) {
+    // Default URL - nothing to do
     return
   }
+  if (id === undefined || src === undefined || cats === undefined || pts === undefined) {
+    throw new ReferenceError('Missing URL arguments')
+  }
 
-  // If some points refer to a non-existing category, remove the points and reload
+  // If some points refer to a non-existing category, throw
   const catsIds = cats.map(c => c.id)
   const hasValidCategoryId = (p: Point): boolean => catsIds.includes(p.categoryId)
   if (pts.some(p => !hasValidCategoryId(p))) {
-    const newPts = pts.filter(hasValidCategoryId)
-    goToComposition(fieldsToComposition(imageSpec, cats, newPts))
+    throw new RangeError("Some points in the URL don't match a category")
   }
 
-  // All the fields of the composition are valid
-  return fieldsToComposition(imageSpec, cats, pts)
+  // replacing ' ' by '+' seems to be required when pasting a data URL
+  // (https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs)
+  // in the 'img=xxx' query parameter
+  const fixedSrc: string = src.replace(/ /g, '+')
+
+  // All the fields of the composition seem to be valid
+  return fieldsToComposition(id, { src: fixedSrc, exportableSrc: fixedSrc }, cats, pts)
 }

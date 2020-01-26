@@ -33,7 +33,6 @@ import Component from 'vue-class-component'
 import { Prop } from 'vue-property-decorator'
 import { getModule } from 'vuex-module-decorators'
 import { Point } from '@/types'
-import { goToCurrentComposition } from '@/utils/urlQuery.ts'
 
 import FilterShadow2 from '@/components/FilterShadow2.vue'
 import FilterShadow8 from '@/components/FilterShadow8.vue'
@@ -41,11 +40,11 @@ import PointHandle from '@/components/PointHandle.vue'
 
 import Points from '@/store/current/points.ts'
 import PointsSelection from '@/store/current/pointsSelection.ts'
-import Socket from '@/store/socket.ts'
+// import Socket from '@/store/socket.ts'
 
 const points = getModule(Points)
 const pointsSelection = getModule(PointsSelection)
-const socket = getModule(Socket)
+// const socket = getModule(Socket)
 
 @Component({
   components: {
@@ -85,14 +84,13 @@ export default class Handles extends Vue {
     // Only update the inner state (don't update the URL)
     points.setXY({ id: pointId, x, y })
     // Send to the socket server
-    socket.change(this.getSocketCallback(pointId, x, y))
+    // socket.change(this.getSocketCallback(pointId, x, y))
   }
   updateXYAndPersist (pointId: string, x: number, y: number): void {
     // Update the URL after the point has been updated
     points.setXY({ id: pointId, x, y })
     // Send to the socket server
-    socket.change(this.getSocketCallback(pointId, x, y))
-    goToCurrentComposition()
+    // socket.change(this.getSocketCallback(pointId, x, y))
   }
   // TODO: don't use any type
   getSocketCallback (pointId: string, x: number, y: number): any {

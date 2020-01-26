@@ -72,7 +72,6 @@ import Vue from 'vue'
 import Component from 'vue-class-component'
 import { getModule } from 'vuex-module-decorators'
 import { mdiPlus } from '@mdi/js'
-import { goToCurrentComposition } from '@/utils/urlQuery.ts'
 import { Point } from '@/types'
 
 import MainPanel from '@/components/MainPanel.vue'
@@ -123,26 +122,22 @@ export default class Main extends Vue {
   deleteSelection () {
     points.deleteSet(pointsSelection.asSet)
     // Send to the socket server
-    socket.change(this.getSocketCallbackDeletePoints(pointsSelection.asArray))
+    // socket.change(this.getSocketCallbackDeletePoints(pointsSelection.asArray))
     pointsSelection.clear()
-    // Update the URL after deleting the points
-    goToCurrentComposition()
   }
   addPoint () {
     // As the API doesn't return the created point, we have to look for it
     const before = new Set(points.asMap.keys())
     points.postRandom(categories.asArray[points.size % categories.size].id)
-    const after = new Set(points.asMap.keys())
-    const difference: string[] = [...after].filter(x => !before.has(x))
-    if (difference.length === 1) {
-      const lastPoint = points.asMap.get(difference[0])
-      if (lastPoint !== undefined) {
-        // Send to the socket server
-        socket.change(this.getSocketCallbackAddPoint(lastPoint))
-      }
-    }
-    // Update the URL after adding the point
-    goToCurrentComposition()
+    // const after = new Set(points.asMap.keys())
+    // const difference: string[] = [...after].filter(x => !before.has(x))
+    // if (difference.length === 1) {
+    //   const lastPoint = points.asMap.get(difference[0])
+    //   if (lastPoint !== undefined) {
+    //     // Send to the socket server
+    //     socket.change(this.getSocketCallbackAddPoint(lastPoint))
+    //   }
+    // }
   }
 
   // TODO: don't use any type

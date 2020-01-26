@@ -153,12 +153,20 @@ export default class Home extends Vue {
   }
 
   // lifecycle hook
-  mounted () {
+  async mounted () {
     this.small = this.$vuetify.breakpoint.thresholds.md * 0.5
     this.barWidth = this.small
 
     // Process the query
-    this.processQuery(this.$store.state.route.query)
+    try {
+      // Set the composition from the URL, or force setting the default one
+      // to ensure everything to be initialized
+      await compositions.updateCurrentComposition(parse(this.$store.state.route.query) || compositions.default)
+      // TODO: empty URL
+    } catch (e) {
+      // Something went wrong during the URL parsing, or when setting the composition
+      // TODO: show an error
+    }
   }
 
   // methods
@@ -170,28 +178,22 @@ export default class Home extends Vue {
     }
   }
 
-  async processQuery (query: UrlQuery) {
-    // Note: the "parse" method is allowed to reroute to a different URL to fix parameters
-    const composition: Composition | undefined = await parse(query)
-    if (composition !== undefined) {
-      // A new composition has been parsed successfully from the query
-
-      // Clear the temporary state data
-      pointsSelection.clear()
-      // Set the composition
-      compositions.setCurrent(composition)
-      // Send the composition to the socket
-      socket.updateComposition(compositions.current)
-      // Update the cached state data
-      await backgroundImage.refresh()
-      pointsMetrics.clear()
-    }
-  }
-
   // Query changes are watched inside the Home view, because the query is specific to this view
   @Watch('$store.state.route.query')
   async onQueryChange (query: UrlQuery, oldVal: UrlQuery) {
-    this.processQuery(query)
+    // Process the query
+    try {
+      const newComposition = parse(query)
+      if (newComposition !== undefined) {
+        // A new composition has been found, load it
+        await compositions.updateCurrentComposition(newComposition)
+        // TODO: empty URL
+      }
+      // else: nothing
+    } catch (e) {
+      // Something went wrong during the URL parsing, or when setting the composition
+      // TODO: show an error
+    }
   }
 }
 </script>

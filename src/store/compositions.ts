@@ -1,15 +1,22 @@
 // See https://championswimmer.in/vuex-module-decorators/
-import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
+import { Action, Module, Mutation, VuexModule, getModule } from 'vuex-module-decorators'
 import uuid from 'uuid'
 import store from '@/store'
 import { Composition, Category, ImageSpec, Point } from '@/types'
 import { fieldsToComposition } from '@/utils/composition.ts'
-
+import { getExportableSrc } from '@/utils/img.ts'
 import {
   defaultImageSpecs,
   defaultCategories,
   defaultPoints
 } from '@/utils/defaults.ts'
+import BackgroundImage from '@/store/current/backgroundImage.ts'
+import PointsMetrics from '@/store/current/pointsMetrics.ts'
+import PointsSelection from '@/store/current/pointsSelection.ts'
+
+const backgroundImage = getModule(BackgroundImage)
+const pointsMetrics = getModule(PointsMetrics)
+const pointsSelection = getModule(PointsSelection)
 
 const initFromDefaults = (
   defaultImageSpecs: ImageSpec[],
@@ -20,12 +27,12 @@ const initFromDefaults = (
     throw new RangeError('The list of default images must contain at least one element.')
   }
   // Set the initial list of compositions
-  return defaultImageSpecs.map(imageSpec => ({
-    id: imageSpec.src,
-    backgroundImage: imageSpec,
-    categories: defaultCategories,
-    points: defaultPoints
-  }))
+  return defaultImageSpecs.map(imageSpec => fieldsToComposition(
+    uuid.v4(),
+    imageSpec,
+    defaultCategories,
+    defaultPoints
+  ))
 }
 
 const defaultCompositions = initFromDefaults(
@@ -33,6 +40,9 @@ const defaultCompositions = initFromDefaults(
   defaultCategories,
   defaultPoints
 )
+
+// TODO: select a random composition?
+const initialId = defaultCompositions[0].id
 
 @Module({ dynamic: true, store, name: 'compositions', namespaced: true })
 export default class Compositions extends VuexModule {
@@ -42,7 +52,7 @@ export default class Compositions extends VuexModule {
 
   list: Map<string, Composition> = new Map(defaultCompositions.map(c => [c.id, c]))
   listChangeTracker: number = 1
-  currentId: string = defaultCompositions[0].id
+  currentId: string = initialId
 
   // Getters - cached, not meant to be exported
   get asMap (): Map<string, Composition> {
@@ -56,13 +66,18 @@ export default class Compositions extends VuexModule {
   get get (): (id: string) => Composition | undefined {
     return (id: string): Composition | undefined => this.asMap.get(id)
   }
-  get getByImageSpec (): (imageSpec: ImageSpec) => Composition | undefined {
-    return (imageSpec: ImageSpec): Composition | undefined => imageSpec.localId ? this.get(imageSpec.localId) : this.get(imageSpec.src)
-  }
   get current (): Composition {
     const c: Composition | undefined = this.get(this.currentId)
     if (c === undefined) {
       throw new RangeError('No current composition has been found. The compositions store should always provide a current composition')
+    }
+    return c
+  }
+  get default (): Composition {
+    const c: Composition | undefined = this.get(initialId)
+    if (c === undefined) {
+      // TODO: it could throw if we add the option to delete compositions
+      throw new RangeError('No default composition has been found. The compositions store should always provide a default composition')
     }
     return c
   }
@@ -84,29 +99,37 @@ export default class Compositions extends VuexModule {
   // Important: actions only receive 1 argument (payload). If you want to
   // receive various arguments -> fields of an Object
   @Action
-  setCurrent (composition: Composition) {
-    // Update the list of compositions
-    this.set(composition)
-    // Set the current id
-    this.setCurrentId(composition.id)
-  }
-
-  @Action
-  appendFromDataUrl (dataUrl: string) {
+  async appendFromDataUrl (dataUrl: string) {
     // Nothing to do if a composition already exists with the same identifier
     // TODO: alternatives: replace it, merge it, or append it to an array of multiple compositions for the same image
     const mode: string = 'ignoreIfExists'
     if (this.has(dataUrl) && mode === 'ignoreIfExists') {
       return
     }
-    this.set(fieldsToComposition({ src: dataUrl, localId: `local:${uuid.v4()}` }))
+    // TODO: also generate a thumbnail for the gallery
+    this.set(fieldsToComposition(uuid.v4(), { src: dataUrl, exportableSrc: await getExportableSrc(dataUrl) }))
   }
   @Action
-  setCurrentPoints (points: Point[]) {
+  async updateCurrentComposition (newComposition: Composition) {
+    // Update the background image
+    // an exception will throw if the image cannot be loaded
+    await backgroundImage.update(newComposition.backgroundImage)
+
+    // Clear the temporary data
+    pointsSelection.clear()
+    pointsMetrics.clear()
+
+    // Send the composition to the socket
+    // socket.updateComposition(compositions.current)
+
+    // Update the list of compositions (will replace an existing composition
+    // if an id matches, or append a new one)
+    this.set(newComposition)
+    // Set as the current composition
+    this.setCurrentId(newComposition.id)
+  }
+  @Action
+  updateCurrentPoints (points: Point[]) {
     this.set({ ...this.current, points })
-  }
-  @Action
-  setCurrentCategories (categories: Category[]) {
-    this.set({ ...this.current, categories })
   }
 }

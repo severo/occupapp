@@ -17,8 +17,68 @@ export async function fetchImage ({
   })
 }
 
-export async function validateImageSpec ({ src, srcset }: ImageSpec): Promise<boolean> {
-  return fetchImage({ src, srcset }).then(() => true).catch(() => false)
+export const getPlaceholderSrc = (
+  w: number = 300,
+  h: number = 150,
+  color: string = '#ccc'
+): string => {
+  const canvas = document.createElement('canvas')
+  const context = canvas.getContext('2d')
+  canvas.width = w
+  canvas.height = h
+  if (context) {
+    context.fillStyle = color
+    context.fillRect(0, 0, w, h)
+  }
+
+  return canvas.toDataURL('image/jpeg')
+}
+
+export const getExportableSrc = async (src: string, w?: number, h?: number): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const img: HTMLImageElement = new Image()
+    img.onload = () => {
+      resolve(coverStr(img, w, h))
+    }
+    img.onerror = reject
+    img.src = src
+  })
+}
+
+export const coverStr = (image: HTMLImageElement, w: number = 50, h?: number): string => {
+  const sNaturalWidth = image.naturalWidth
+  const sNaturalHeight = image.naturalHeight
+  const sAspectRatio = sNaturalWidth / sNaturalHeight
+
+  const dx = 0
+  const dy = 0
+  const dWidth = w
+  const dHeight = (h !== undefined) ? h : w / sAspectRatio
+
+  const dAspectRatio = dWidth / dHeight
+
+  let sx, sy, sWidth, sHeight
+  if (sAspectRatio > dAspectRatio) {
+    sHeight = sNaturalHeight
+    sWidth = sNaturalHeight * dAspectRatio
+    sx = (sNaturalWidth - sWidth) / 2
+    sy = 0
+  } else {
+    sHeight = sNaturalWidth / dAspectRatio
+    sWidth = sNaturalWidth
+    sx = 0
+    sy = (sNaturalHeight - sHeight) / 2
+  }
+
+  const canvas = document.createElement('canvas')
+  const context = canvas.getContext('2d')
+  canvas.width = dWidth
+  canvas.height = dHeight
+  if (context) {
+    context.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
+  }
+
+  return canvas.toDataURL('image/jpeg')
 }
 
 /*

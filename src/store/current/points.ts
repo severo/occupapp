@@ -75,7 +75,7 @@ export default class Points extends VuexModule {
   // receive various arguments -> fields of an Object
   @Action
   setPoints (points: Point[]) {
-    compositions.setCurrentPoints(points)
+    compositions.updateCurrentPoints(points)
   }
   @Action
   setPoint (point: Point) {

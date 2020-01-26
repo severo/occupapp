@@ -20,14 +20,15 @@ const pointToUrlQuerySpecCat = (c: Category): UrlQuerySpecCat => {
 
 export const compositionToUrlQuerySpec = (c: Composition): UrlQuerySpec => {
   return {
-    img: c.backgroundImage.localId || c.backgroundImage.src,
+    id: c.id,
+    img: c.backgroundImage.exportableSrc,
     cats: c.categories.map(pointToUrlQuerySpecCat),
     pts: c.points.map(pointToUrlQuerySpecPt)
   }
 }
-export const fieldsToComposition = (imageSpec: ImageSpec, categories: Category[] = defaultCategories, points: Point[] = defaultPoints): Composition => {
+export const fieldsToComposition = (id: string, imageSpec: ImageSpec, categories: Category[] = defaultCategories, points: Point[] = defaultPoints): Composition => {
   return {
-    id: imageSpec.localId || imageSpec.src,
+    id,
     backgroundImage: imageSpec,
     categories,
     points

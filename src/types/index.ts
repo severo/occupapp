@@ -3,9 +3,9 @@ import { Route } from 'vue-router/types/router'
 // Images
 export interface ImageSpec {
   src: string
+  exportableSrc: string
   srcset?: string
   thumbnailSrc?: string
-  localId?: string
 }
 
 // Points
@@ -35,6 +35,7 @@ export interface Composition {
 
 // URL Query Specification (the data required to forge an URL query)
 export interface UrlQuerySpec {
+  id: string
   img: UrlQuerySpecImg
   pts?: UrlQuerySpecPt[]
   cats?: UrlQuerySpecCat[]

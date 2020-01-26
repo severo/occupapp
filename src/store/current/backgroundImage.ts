@@ -1,12 +1,11 @@
 // Current background image
 
 // See https://championswimmer.in/vuex-module-decorators/
-import { Action, Module, Mutation, VuexModule, getModule } from 'vuex-module-decorators'
+import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import { fetchImage } from '@/utils/img.ts'
-import store from '@/store'
+import { ImageSpec } from '@/types'
 
-import Compositions from '@/store/compositions.ts'
-const compositions = getModule(Compositions)
+import store from '@/store'
 
 @Module({ dynamic: true, store, name: 'backgroundImage', namespaced: true })
 export default class BackgroundImage extends VuexModule {
@@ -21,10 +20,6 @@ export default class BackgroundImage extends VuexModule {
   get naturalHeight (): number {
     return this.image.naturalHeight
   }
-  get src (): string {
-    return this.image.src
-  }
-
   get aspectRatio (): number {
     if (this.naturalHeight === 0) {
       return 1
@@ -46,9 +41,16 @@ export default class BackgroundImage extends VuexModule {
   }
 
   @Action
-  async refresh () {
-    this.setNotReady()
-    this.setImage(await fetchImage(compositions.current.backgroundImage))
+  async update (imageSpec: ImageSpec) {
+    // this.setNotReady()
+    try {
+      if (imageSpec.src !== this.image.src || imageSpec.srcset !== this.image.srcset) {
+        // if the background image has changed, try to update it
+        this.setImage(await fetchImage(imageSpec))
+      }
+    } catch (e) {
+      throw new ReferenceError('Background image could not be loaded')
+    }
     this.setReady()
   }
 }

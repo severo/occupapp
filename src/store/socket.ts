@@ -9,10 +9,11 @@ import {
 import ioClient from 'socket.io-client'
 import Automerge from 'automerge'
 import store from '@/store'
-import { Composition, Guest, Category, Point } from '@/types'
-import { goToComposition } from '@/utils/urlQuery.ts'
+import { Composition, Guest } from '@/types'
 
+import Compositions from '@/store/compositions.ts'
 import Settings from '@/store/settings.ts'
+const compositions = getModule(Compositions)
 const settings = getModule(Settings)
 
 // TypeScript definitions copied from socket-server
@@ -98,7 +99,7 @@ const prepareAndGoToComposition = (c: any): void => {
     categories: Object.keys(c.categories).map((id: string) => ({ ...c.categories[id] })),
     points: Object.keys(c.points).map((id: string) => ({ ...c.points[id] }))
   }
-  goToComposition(d)
+  compositions.updateCurrentComposition(d)
 }
 
 @Module({ dynamic: true, store, name: 'socket', namespaced: true })

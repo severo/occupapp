@@ -1,6 +1,7 @@
 import * as d3 from 'd3'
 import { Category, ImageSpec, Point } from '@/types'
 import uuid from 'uuid'
+import { getPlaceholderSrc } from './img'
 
 // Images
 function forgeUrl (name: string, width: number): string {
@@ -27,9 +28,11 @@ const defaultImageSpecs: ImageSpec[] = names.map(name => {
   return {
     src: forgeUrl(name, maxWidth),
     srcset: widths.map(w => `${forgeUrl(name, w)} ${w}w`).join(','),
+    exportableSrc: forgeUrl(name, maxWidth),
     thumbnailSrc: forgeUrl(name, minWidth)
   }
 })
+defaultImageSpecs.splice(0, 0, { src: getPlaceholderSrc(), srcset: '', thumbnailSrc: '', exportableSrc: getPlaceholderSrc(50, 25) })
 
 // Categories
 const defaultPalette = [d3.rgb(255, 195, 8), d3.rgb(172, 159, 253), d3.rgb(181, 246, 66), d3.rgb(239, 106, 222)]
