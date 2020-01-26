@@ -24,9 +24,6 @@ export default class PointsMetrics extends VuexModule {
     // so it gets re-evaluated whenever `listChangeTracker` changes - HACK
     return this.areasChangeTracker ? this.areas : this.areas
   }
-  get areasAsArray (): Area[] {
-    return [...this.areasAsMap.values()]
-  }
   get size (): number {
     return this.areasAsMap.size
   }
@@ -39,7 +36,7 @@ export default class PointsMetrics extends VuexModule {
 
   // Mutations (synchronous)
   @Mutation
-  areasFromMap (areas: Map<string, Area>) {
+  setAreas (areas: Map<string, Area>) {
     this.areas = areas
     // Trigger Vue updates
     this.areasChangeTracker += 1
@@ -54,6 +51,6 @@ export default class PointsMetrics extends VuexModule {
   // receive various arguments -> fields of an Object
   @Action
   clear () {
-    this.areasFromMap(new Map())
+    this.setAreas(new Map())
   }
 }

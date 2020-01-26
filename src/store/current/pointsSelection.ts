@@ -31,7 +31,7 @@ export default class PointsSelection extends VuexModule {
 
   // Mutations (synchronous)
   @Mutation
-  fromSet (ids: Set<string>) {
+  set (ids: Set<string>) {
     this.ids = ids
     // Trigger Vue updates
     this.idsChangeTracker += 1
@@ -49,11 +49,11 @@ export default class PointsSelection extends VuexModule {
   // Actions
   @Action
   fromArray (ids: string[]) {
-    this.fromSet(new Set(ids))
+    this.set(new Set(ids))
   }
   @Action
   clear () {
-    this.fromSet(new Set())
+    this.set(new Set())
   }
   @Action
   toggle (id: string) {
