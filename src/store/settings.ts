@@ -1,5 +1,5 @@
 // See https://championswimmer.in/vuex-module-decorators/
-import { Module, Mutation, VuexModule } from 'vuex-module-decorators'
+import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import createPersistedState from 'vuex-persistedstate'
 import store from '@/store'
 
@@ -18,16 +18,22 @@ export default class Settings extends VuexModule {
     this.showImageColors = value
   }
   @Mutation
-  enableCollaboration () {
-    this.isCollaborationActive = true
-  }
-  @Mutation
-  disableCollaboration () {
-    this.isCollaborationActive = false
+  setIsCollaborationActive (value: boolean) {
+    this.isCollaborationActive = value
   }
   @Mutation
   setMe (me: string) {
     this.me = me
+  }
+
+  // Actions (asynchronous)
+  @Action
+  enableCollaboration () {
+    this.setIsCollaborationActive(true)
+  }
+  @Action
+  disableCollaboration () {
+    this.setIsCollaborationActive(false)
   }
 }
 
