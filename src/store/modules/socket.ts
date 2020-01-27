@@ -59,7 +59,7 @@ const options: SocketIOClient.ConnectOpts = {
 const serverUrl =
   process.env.NODE_ENV === 'development'
     ? 'http://localhost:3000/occupapp-beta'
-    : 'https://mighty-hollows-64715.herokuapp.com/occupapp-beta'
+    : 'https://immense-coast-15741.herokuapp.com/occupapp-beta'
 
 @Module({ name: 'socket', namespaced: true })
 export default class SocketModule extends VuexModule {
