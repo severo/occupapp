@@ -5,10 +5,8 @@ import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import { fetchImage } from '@/utils/img.ts'
 import { ImageSpec } from '@/types'
 
-import store from '@/store'
-
-@Module({ dynamic: true, store, name: 'backgroundImage', namespaced: true })
-export default class BackgroundImage extends VuexModule {
+@Module({ name: 'backgroundImage' })
+export default class BackgroundImageModule extends VuexModule {
   // State - state of truth - meant to be exported as a JSON - init definitions
   image: HTMLImageElement = new Image()
   isReady: boolean = false
@@ -42,15 +40,22 @@ export default class BackgroundImage extends VuexModule {
 
   @Action
   async update (imageSpec: ImageSpec) {
+    // TODO: maybe show the placeholder when updating the image
+    // But it's surely better to just not
+    // change anything, ie. let the previous image, until the new one is ready
     // this.setNotReady()
-    try {
-      if (imageSpec.src !== this.image.src || imageSpec.srcset !== this.image.srcset) {
+    if (
+      imageSpec.src !== this.image.src ||
+      imageSpec.srcset !== this.image.srcset ||
+      !this.isReady
+    ) {
+      try {
         // if the background image has changed, try to update it
         this.setImage(await fetchImage(imageSpec))
+        this.setReady()
+      } catch (e) {
+        throw new ReferenceError('Background image could not be loaded')
       }
-    } catch (e) {
-      throw new ReferenceError('Background image could not be loaded')
     }
-    this.setReady()
   }
 }

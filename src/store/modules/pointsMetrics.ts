@@ -2,15 +2,14 @@
 
 // See https://championswimmer.in/vuex-module-decorators/
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
-import store from '@/store'
 
 export interface Area {
-  pointId: string;
-  area: number;
+  pointId: string
+  area: number
 }
 
-@Module({ dynamic: true, store, name: 'pointsMetrics', namespaced: true })
-export default class PointsMetrics extends VuexModule {
+@Module({ name: 'pointsMetrics', namespaced: true })
+export default class PointsMetricsModule extends VuexModule {
   // IMPORTANT. We use a hack to add Vue reactivity to Map and Set objects
   // See https://stackoverflow.com/a/45441321/7351594
 
@@ -27,12 +26,9 @@ export default class PointsMetrics extends VuexModule {
   get size (): number {
     return this.areasAsMap.size
   }
-  get getArea (): (id:string) => Area | undefined {
-    return (id:string): Area | undefined => this.areasAsMap.get(id)
+  get getArea (): (id: string) => Area | undefined {
+    return (id: string): Area | undefined => this.areasAsMap.get(id)
   }
-  // get has (): (id:string) => boolean {
-  //   return (id:string): boolean => this.asMap.has(id)
-  // }
 
   // Mutations (synchronous)
   @Mutation

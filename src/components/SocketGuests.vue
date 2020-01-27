@@ -52,13 +52,9 @@
 <script lang="ts">
 import Vue from 'vue'
 import Component from 'vue-class-component'
-import { getModule } from 'vuex-module-decorators'
-
 import { Guest } from '@/types'
 
-import Socket from '@/store/socket.ts'
-
-const socketStore = getModule(Socket)
+import { socketStore } from '@/store'
 
 @Component
 export default class SocketGuests extends Vue {

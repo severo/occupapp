@@ -6,11 +6,6 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import { Prop } from 'vue-property-decorator'
-import { getModule } from 'vuex-module-decorators'
-
-import Compositions from '@/store/compositions.ts'
-
-const compositions = getModule(Compositions)
 
 @Component
 export default class StoreJSON extends Vue {
@@ -21,5 +16,4 @@ export default class StoreJSON extends Vue {
     return JSON.stringify(this.json, null, 2)
   }
 }
-
 </script>

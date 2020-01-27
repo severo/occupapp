@@ -13,9 +13,7 @@
           :key="c.id"
           cols="auto"
         >
-          <v-item
-            v-slot:default="{ active, toggle }"
-          >
+          <v-item v-slot:default="{ active, toggle }">
             <v-img
               :src="c.backgroundImage.thumbnailSrc || c.backgroundImage.src"
               :srcset="c.backgroundImage.srcset"
@@ -25,9 +23,7 @@
               aspect-ratio="1"
               @click="toggle"
             >
-              <v-overlay
-                absolute
-              >
+              <v-overlay absolute>
                 <v-btn
                   icon
                   dark
@@ -35,7 +31,7 @@
                 >
                   <v-icon
                     large
-                    :class="{active}"
+                    :class="{ active }"
                   >
                     mdi-check
                   </v-icon>
@@ -69,7 +65,7 @@
   text-transform: uppercase;
 }
 .v-overlay {
-  opacity: 0
+  opacity: 0;
 }
 .v-item--active .v-overlay,
 .v-overlay:hover,
@@ -86,15 +82,13 @@
 <script lang="ts">
 import Vue from 'vue'
 import Component from 'vue-class-component'
-import { getModule } from 'vuex-module-decorators'
+import uuid from 'uuid'
 import { Composition } from '@/types'
-import { getImageUrl } from '@/utils/img.ts'
+import { getImageUrl, getExportableSrc } from '@/utils/img.ts'
 
 import ImageUploaderButton from '@/components/ImageUploaderButton.vue'
 
-import Compositions from '@/store/compositions.ts'
-
-const compositions = getModule(Compositions)
+import { compositionsStore } from '@/store'
 
 @Component({
   components: {
@@ -103,15 +97,15 @@ const compositions = getModule(Compositions)
 })
 export default class Gallery extends Vue {
   get compos (): Composition[] {
-    return compositions.asArray
+    return compositionsStore.asArray
   }
   get selected (): number {
     // TODO: see if v-item-group could work with a map instead of an array
-    return this.compos.findIndex(c => c.id === compositions.current.id)
+    return this.compos.findIndex(c => c.id === compositionsStore.current.id)
   }
   set selected (idx: number) {
     // Update the URL with the selected composition
-    compositions.updateCurrentComposition(this.compos[idx])
+    compositionsStore.updateCurrentComposition(this.compos[idx])
   }
   async addFiles (files: File[]) {
     // Actions
@@ -120,7 +114,12 @@ export default class Gallery extends Vue {
     for (const f of files) {
       const dataUrl: string = await getImageUrl(f)
       if (dataUrl !== '') {
-        compositions.appendFromDataUrl(dataUrl)
+        // TODO: also generate a thumbnail for the gallery
+        const imageSpec = {
+          src: dataUrl,
+          exportableSrc: await getExportableSrc(dataUrl)
+        }
+        compositionsStore.appendCompositionFromImageSpec(imageSpec)
       }
     }
     files = []

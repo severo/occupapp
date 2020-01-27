@@ -13,8 +13,7 @@
         :key="idx"
         :x="point.x"
         :y="point.y"
-        @updatemovingxy="updateXY(point.id, $event.x, $event.y) /* Note: the URL is not updated during the move */"
-        @updatexy="updateXYAndPersist(point.id, $event.x, $event.y)"
+        @updatexy="updateXY(point.id, $event.x, $event.y)"
         :selected="isSelected(point.id)"
         @select="select(point.id)"
         @toggle="toggle(point.id)"
@@ -31,20 +30,13 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import { Prop } from 'vue-property-decorator'
-import { getModule } from 'vuex-module-decorators'
 import { Point } from '@/types'
 
 import FilterShadow2 from '@/components/FilterShadow2.vue'
 import FilterShadow8 from '@/components/FilterShadow8.vue'
 import PointHandle from '@/components/PointHandle.vue'
 
-import Points from '@/store/current/points.ts'
-import PointsSelection from '@/store/current/pointsSelection.ts'
-// import Socket from '@/store/socket.ts'
-
-const points = getModule(Points)
-const pointsSelection = getModule(PointsSelection)
-// const socket = getModule(Socket)
+import { pointsStore, pointsSelectionStore } from '@/store'
 
 @Component({
   components: {
@@ -73,41 +65,24 @@ export default class Handles extends Vue {
   }
 
   get pointsArray (): Point[] {
-    return points.asArray
+    return pointsStore.asArray
   }
   get selecting (): boolean {
-    return pointsSelection.size > 0
+    return pointsSelectionStore.size > 0
   }
 
   // methods
   updateXY (pointId: string, x: number, y: number): void {
-    // Only update the inner state (don't update the URL)
-    points.setXY({ id: pointId, x, y })
-    // Send to the socket server
-    // socket.change(this.getSocketCallback(pointId, x, y))
+    pointsStore.setXY({ id: pointId, x, y })
   }
-  updateXYAndPersist (pointId: string, x: number, y: number): void {
-    // Update the URL after the point has been updated
-    points.setXY({ id: pointId, x, y })
-    // Send to the socket server
-    // socket.change(this.getSocketCallback(pointId, x, y))
+  select (pointId: string): void {
+    pointsSelectionStore.add(pointId)
   }
-  // TODO: don't use any type
-  getSocketCallback (pointId: string, x: number, y: number): any {
-    // TODO: don't use any type
-    return (doc: any) => {
-      doc.composition.points[pointId].x = x
-      doc.composition.points[pointId].y = y
-    }
-  }
-  select (pointId: string):void {
-    pointsSelection.add(pointId)
-  }
-  toggle (pointId: string):void {
-    pointsSelection.toggle(pointId)
+  toggle (pointId: string): void {
+    pointsSelectionStore.toggle(pointId)
   }
   isSelected (pointId: string): boolean {
-    return pointsSelection.has(pointId)
+    return pointsSelectionStore.has(pointId)
   }
 }
 </script>

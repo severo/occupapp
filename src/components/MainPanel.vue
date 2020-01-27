@@ -1,7 +1,5 @@
 <template>
-  <div
-    class="position-relative"
-  >
+  <div class="position-relative">
     <Background
       ref="background"
       class="below"
@@ -21,15 +19,11 @@
 import Vue from 'vue'
 import Component, { mixins } from 'vue-class-component'
 import { Prop, Watch } from 'vue-property-decorator'
-
-import { getModule } from 'vuex-module-decorators'
-
 import Background from '@/components/Background.vue'
 import Handles from '@/components/Handles.vue'
 import SizeGetter from '@/mixins/SizeGetter.ts'
 
-import BackgroundImage from '@/store/current/backgroundImage.ts'
-const backgroundImage = getModule(BackgroundImage)
+import { backgroundImageStore } from '@/store'
 
 @Component({
   components: {
@@ -38,7 +32,7 @@ const backgroundImage = getModule(BackgroundImage)
   }
 })
 export default class MainPanel extends mixins(SizeGetter) {
-  get size (): {width: number, height: number} {
+  get size (): { width: number; height: number } {
     let width = this.width
     let height = this.height
     if (width > height * this.aspectRatio) {
@@ -51,7 +45,7 @@ export default class MainPanel extends mixins(SizeGetter) {
 
   // computed
   get aspectRatio () {
-    return backgroundImage.aspectRatio
+    return backgroundImageStore.aspectRatio
   }
 }
 </script>

@@ -34,7 +34,11 @@ export const getPlaceholderSrc = (
   return canvas.toDataURL('image/jpeg')
 }
 
-export const getExportableSrc = async (src: string, w?: number, h?: number): Promise<string> => {
+export const getExportableSrc = async (
+  src: string,
+  w?: number,
+  h?: number
+): Promise<string> => {
   return new Promise((resolve, reject) => {
     const img: HTMLImageElement = new Image()
     img.onload = () => {
@@ -45,7 +49,11 @@ export const getExportableSrc = async (src: string, w?: number, h?: number): Pro
   })
 }
 
-export const coverStr = (image: HTMLImageElement, w: number = 50, h?: number): string => {
+export const coverStr = (
+  image: HTMLImageElement,
+  w: number = 50,
+  h?: number
+): string => {
   const sNaturalWidth = image.naturalWidth
   const sNaturalHeight = image.naturalHeight
   const sAspectRatio = sNaturalWidth / sNaturalHeight
@@ -53,7 +61,7 @@ export const coverStr = (image: HTMLImageElement, w: number = 50, h?: number): s
   const dx = 0
   const dy = 0
   const dWidth = w
-  const dHeight = (h !== undefined) ? h : w / sAspectRatio
+  const dHeight = h !== undefined ? h : w / sAspectRatio
 
   const dAspectRatio = dWidth / dHeight
 
@@ -97,8 +105,7 @@ export async function getImageUrl (
 ): Promise<string> {
   return readOrientation(file).then(orientation => {
     return applyRotation(file, orientation || 1, maxWidth)
-  }
-  )
+  })
 }
 
 /**

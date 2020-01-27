@@ -1,24 +1,19 @@
 <template>
   <div>
-    <HotTable
-      :settings="hotSettings"
-    />
+    <HotTable :settings="hotSettings" />
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import Component from 'vue-class-component'
-import { getModule } from 'vuex-module-decorators'
 import Handsontable from 'handsontable'
 
 import { HotTable } from '@handsontable/vue'
 
 import { Category } from '@/types'
 
-import Categories from '@/store/current/categories.ts'
-
-const categories = getModule(Categories)
+import { categoriesStore } from '@/store'
 
 @Component({
   components: {
@@ -30,11 +25,9 @@ export default class CategoriesTable extends Vue {
     return ['color']
   }
   get categoriesObject () {
-    return categories.asArray.map(
-      c => {
-        return { color: c.color }
-      }
-    )
+    return categoriesStore.asArray.map(c => {
+      return { color: c.color }
+    })
   }
   get hotSettings () {
     return {
@@ -47,5 +40,4 @@ export default class CategoriesTable extends Vue {
     }
   }
 }
-
 </script>

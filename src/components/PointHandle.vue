@@ -25,9 +25,7 @@
       :stroke-dasharray="strokeDashArray"
       :stroke-dashoffset="strokeDashOffset"
     />
-    <text
-      class="text"
-    >
+    <text class="text">
       {{ text }}
     </text>
   </g>
@@ -60,7 +58,7 @@ export default class PointHandle extends Vue {
 
   // annotate refs type
   $refs!: {
-    g: SVGGElement,
+    g: SVGGElement
   }
 
   get g () {
@@ -121,14 +119,20 @@ export default class PointHandle extends Vue {
   dragged () {
     if (!this.selecting) {
       this.cancelSelecting()
-      this.$emit('updatemovingxy', { x: this.x + this.xScale.invert(d3.event.dx), y: this.y + this.yScale.invert(d3.event.dy) })
+      this.$emit('updatexy', {
+        x: this.x + this.xScale.invert(d3.event.dx),
+        y: this.y + this.yScale.invert(d3.event.dy)
+      })
       this.initSelecting()
     }
   }
   dragEnded () {
     if (!this.selecting) {
       this.cancelSelecting()
-      this.$emit('updatexy', { x: this.x + this.xScale.invert(d3.event.dx), y: this.y + this.yScale.invert(d3.event.dy) })
+      this.$emit('updatexy', {
+        x: this.x + this.xScale.invert(d3.event.dx),
+        y: this.y + this.yScale.invert(d3.event.dy)
+      })
       this.g.classed('dragged', false)
     }
   }
@@ -202,5 +206,4 @@ export default class PointHandle extends Vue {
     fill: currentColor
     font-size: 15px
     font-weight: bold
-
 </style>

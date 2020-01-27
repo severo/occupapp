@@ -100,7 +100,6 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import { Watch } from 'vue-property-decorator'
-import { getModule } from 'vuex-module-decorators'
 
 import CollaborationPanel from '@/components/CollaborationPanel.vue'
 import PointsList from '@/components/PointsList.vue'
@@ -110,19 +109,9 @@ import Infos from '@/components/Infos.vue'
 import Main from '@/components/Main.vue'
 
 import { Composition, UrlQuery } from '@/types'
-import { parse } from '@/utils/urlQuery.ts'
+import { parse } from '@/utils/parse.ts'
 
-import BackgroundImage from '@/store/current/backgroundImage.ts'
-import Compositions from '@/store/compositions.ts'
-import PointsMetrics from '@/store/current/pointsMetrics.ts'
-import PointsSelection from '@/store/current/pointsSelection.ts'
-import Socket from '@/store/socket.ts'
-
-const backgroundImage = getModule(BackgroundImage)
-const compositions = getModule(Compositions)
-const pointsMetrics = getModule(PointsMetrics)
-const pointsSelection = getModule(PointsSelection)
-const socket = getModule(Socket)
+import { compositionsStore } from '@/store'
 
 @Component({
   components: {
@@ -159,13 +148,16 @@ export default class Home extends Vue {
 
     // Process the query
     try {
-      // Set the composition from the URL, or force setting the default one
+      // Set the composition from the URL, or force setting the current one
       // to ensure everything to be initialized
-      await compositions.updateCurrentComposition(parse(this.$store.state.route.query) || compositions.default)
+      await compositionsStore.updateCurrentComposition(
+        parse(this.$store.state.route.query) || compositionsStore.current
+      )
       // TODO: empty URL
     } catch (e) {
       // Something went wrong during the URL parsing, or when setting the composition
       // TODO: show an error
+      await compositionsStore.updateCurrentComposition(compositionsStore.current)
     }
   }
 
@@ -179,22 +171,25 @@ export default class Home extends Vue {
   }
 
   // Query changes are watched inside the Home view, because the query is specific to this view
-  @Watch('$store.state.route.query')
-  async onQueryChange (query: UrlQuery, oldVal: UrlQuery) {
-    // Process the query
-    try {
-      const newComposition = parse(query)
-      if (newComposition !== undefined) {
-        // A new composition has been found, load it
-        await compositions.updateCurrentComposition(newComposition)
-        // TODO: empty URL
-      }
-      // else: nothing
-    } catch (e) {
-      // Something went wrong during the URL parsing, or when setting the composition
-      // TODO: show an error
-    }
-  }
+  // TODO: do a quick parsing, to see if the composition id has changed. If it has changed,
+  // update the composition
+  //
+  // @Watch('$store.state.route.query')
+  // async onQueryChange (query: UrlQuery, oldVal: UrlQuery) {
+  //   // Process the query
+  //   try {
+  //     const newComposition = parse(query)
+  //     if (newComposition !== undefined) {
+  //       // A new composition has been found, load it
+  //       await compositionsStore.updateCurrentComposition(newComposition)
+  //       // TODO: empty URL
+  //     }
+  //     // else: nothing
+  //   } catch (e) {
+  //     // Something went wrong during the URL parsing, or when setting the composition
+  //     // TODO: show an error
+  //   }
+  // }
 }
 </script>
 

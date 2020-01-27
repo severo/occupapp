@@ -2,10 +2,9 @@
 
 // See https://championswimmer.in/vuex-module-decorators/
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
-import store from '@/store'
 
-@Module({ dynamic: true, store, name: 'pointsSelection', namespaced: true })
-export default class PointsSelection extends VuexModule {
+@Module({ name: 'pointsSelection', namespaced: true })
+export default class PointsSelectionModule extends VuexModule {
   // IMPORTANT. We use a hack to add Vue reactivity to Map and Set objects
   // See https://stackoverflow.com/a/45441321/7351594
 
@@ -25,8 +24,8 @@ export default class PointsSelection extends VuexModule {
   get size (): number {
     return this.asSet.size
   }
-  get has (): (id:string) => boolean {
-    return (id:string): boolean => this.asSet.has(id)
+  get has (): (id: string) => boolean {
+    return (id: string): boolean => this.asSet.has(id)
   }
 
   // Mutations (synchronous)
@@ -51,7 +50,7 @@ export default class PointsSelection extends VuexModule {
   fromArray (ids: string[]) {
     this.set(new Set(ids))
   }
-  @Action
+  @Action({ rawError: true })
   clear () {
     this.set(new Set())
   }

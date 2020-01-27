@@ -1,13 +1,11 @@
 // Current points (or agents)
 
 // See https://championswimmer.in/vuex-module-decorators/
-import { Action, Module, VuexModule, getModule } from 'vuex-module-decorators'
-import store from '@/store'
+import { Action, Module, VuexModule } from 'vuex-module-decorators'
 import uuid from 'uuid'
-import { Point, XYId } from '@/types'
+import { Point, XY, XYId } from '@/types'
 
-import Compositions from '@/store/compositions.ts'
-const compositions = getModule(Compositions)
+import { compositionsStore } from '@/store/store-accessor'
 
 export type Domain = [number, number]
 
@@ -20,7 +18,7 @@ const xDomain: Domain = [0, 100]
 const yDomain: Domain = [0, 100]
 const MAX_DIGITS = 2
 
-function clampToDomain (z: number, domain: Domain): number {
+function clip (z: number, domain: Domain): number {
   if (z < domain[0]) {
     return domain[0]
   }
@@ -35,19 +33,20 @@ function restrictPrecision (x: number): number {
   return Math.round(x * MULTIPLIER) / MULTIPLIER
 }
 
-function clampAndRestrictPrecision (point: Point): Point {
-  point.x = clampToDomain(restrictPrecision(+point.x), xDomain)
-  point.y = clampToDomain(restrictPrecision(+point.y), yDomain)
-  return point
+function clipAndRound ({ x, y }: XY): XY {
+  return {
+    x: clip(restrictPrecision(+x), xDomain),
+    y: clip(restrictPrecision(+y), yDomain)
+  }
 }
 
-@Module({ dynamic: true, store, name: 'points', namespaced: true })
-export default class Points extends VuexModule {
+@Module({ name: 'points', namespaced: true })
+export default class PointsModule extends VuexModule {
   // State - state of truth - meant to be exported as a JSON - init definitions
 
   // Getters - cached, not meant to be exported
   get asArray (): Point[] {
-    return [...compositions.current.points].sort(
+    return Object.values(compositionsStore.current.points).sort(
       (p1, p2) => p1.number - p2.number
     )
   }
@@ -58,15 +57,18 @@ export default class Points extends VuexModule {
     return this.asMap.size
   }
   get nextNumber (): number {
+    // TODO: improve this, because surely there will be collisions when collaborating
     // the first free integer (there might be gaps between points numbers)
     // the points are ordered by number
     const startAt = 1
     if (this.size === 0 || this.asArray[0].number > startAt) {
       return startAt
     }
-    const pointBeforeGap = this.asArray.slice(0, this.size - 1).find(
-      (p, i) => p.number + 1 < this.asArray[i + 1].number
-    ) || this.asArray[this.size - 1]
+    const pointBeforeGap =
+      this.asArray
+        .slice(0, this.size - 1)
+        .find((p, i) => p.number + 1 < this.asArray[i + 1].number) ||
+      this.asArray[this.size - 1]
     return pointBeforeGap.number + 1
   }
 
@@ -74,19 +76,8 @@ export default class Points extends VuexModule {
   // Important: actions only receive 1 argument (payload). If you want to
   // receive various arguments -> fields of an Object
   @Action
-  setPoints (points: Point[]) {
-    compositions.updateCurrentPoints(points)
-  }
-  @Action
-  setPoint (point: Point) {
-    // Don't allow positions outside of [0, 100] + reduce precision
-    this.setPoints([
-      ...this.asMap.set(point.id, clampAndRestrictPrecision(point)).values()
-    ])
-  }
-  @Action
   deleteSet (ids: Set<string>) {
-    this.setPoints(this.asArray.filter(p => !ids.has(p.id)))
+    compositionsStore.deletePoints(ids)
   }
   @Action
   setXY ({ id, x, y }: XYId) {
@@ -94,11 +85,17 @@ export default class Points extends VuexModule {
     if (point === undefined) {
       throw RangeError(`There is no point id=${id} in the list`)
     } else {
-      this.setPoint({ ...point, x, y })
+      compositionsStore.movePoint({ id, ...clipAndRound({ x, y }) })
     }
   }
   @Action
   postRandom (categoryId: string) {
-    this.setPoint({ id: uuid.v4(), number: this.nextNumber, x: random10To90(), y: random10To90(), categoryId })
+    const point = {
+      id: uuid.v4(),
+      number: this.nextNumber,
+      categoryId,
+      ...clipAndRound({ x: random10To90(), y: random10To90() })
+    }
+    compositionsStore.appendPoint(point)
   }
 }

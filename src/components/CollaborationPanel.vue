@@ -10,12 +10,14 @@
       </h3>
       <SocketGuests />
       <p class="overline">
-        Also join the <a
+        Also join the
+        <a
           target="_blank"
           href="https://meet.jit.si/occupappbeta"
         >Jitsi room<v-icon
           style="color: currentColor; fontSize: 0.7rem"
-        >mdi-open-in-new</v-icon></a> for more interaction.
+        >mdi-open-in-new</v-icon></a>
+        for more interaction.
       </p>
     </div>
     <div v-else-if="isCollaborationActive && !isConnected">
@@ -31,15 +33,10 @@
 <script lang="ts">
 import Vue from 'vue'
 import Component from 'vue-class-component'
-import { getModule } from 'vuex-module-decorators'
 
 import SocketGuests from '@/components/SocketGuests.vue'
 
-import Socket from '@/store/socket.ts'
-import Settings from '@/store/settings.ts'
-
-const socketStore = getModule(Socket)
-const settings = getModule(Settings)
+import { socketStore, settingsStore } from '@/store'
 
 @Component({
   components: {
@@ -51,22 +48,22 @@ export default class CollaborationPanel extends Vue {
     return socketStore.socket.connected
   }
   get isCollaborationActive (): boolean {
-    return settings.isCollaborationActive
+    return settingsStore.isCollaborationActive
   }
   set isCollaborationActive (value: boolean) {
     this.toggleCollaboration()
   }
 
   toggleCollaboration () {
-    if (settings.isCollaborationActive === true) {
-      settings.disableCollaboration()
+    if (settingsStore.isCollaborationActive === true) {
+      settingsStore.disableCollaboration()
       // Disconnect the socket
       socketStore.disconnect()
     } else {
       // TODO: add a loader icon + a message in case the connection fails (or is lost)
       // Establish connection
       socketStore.connect()
-      settings.enableCollaboration()
+      settingsStore.enableCollaboration()
     }
   }
 }

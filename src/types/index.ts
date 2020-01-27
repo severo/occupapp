@@ -1,5 +1,14 @@
 import { Route } from 'vue-router/types/router'
 
+export type FakeMap<T> = {[id: string]: T}
+
+// See https://stackoverflow.com/a/51114250/7351594
+// See https://github.com/automerge/automerge/blob/master/@types/automerge/index.d.ts
+export type AutomergeState = import('automerge').Doc<{
+  compositions: FakeMap<Composition>,
+  currentId: string
+}>
+
 // Images
 export interface ImageSpec {
   src: string
@@ -9,10 +18,12 @@ export interface ImageSpec {
 }
 
 // Points
-export interface XYId {
-  id: string
+export interface XY {
   x: number
   y: number
+}
+export interface XYId extends XY {
+  id: string
 }
 export interface Point extends XYId {
   number: number
@@ -29,8 +40,8 @@ export interface Category {
 export interface Composition {
   id: string
   backgroundImage: ImageSpec
-  points: Point[]
-  categories: Category[]
+  points: FakeMap<Point>
+  categories: FakeMap<Category>
 }
 
 // URL Query Specification (the data required to forge an URL query)

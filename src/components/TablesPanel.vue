@@ -35,23 +35,18 @@
   </v-container>
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>
 
 <script lang="ts">
 import Vue from 'vue'
 import Component from 'vue-class-component'
-import { getModule } from 'vuex-module-decorators'
-import { compositionToUrlQuerySpec } from '@/utils/composition.ts'
+import { compositionToUrlQuerySpec } from '@/utils/router.ts'
 
 import CategoriesTable from '@/components/CategoriesTable.vue'
 import PointsTable from '@/components/PointsTable.vue'
 import JsonBlock from '@/components/JsonBlock.vue'
 
-import Compositions from '@/store/compositions.ts'
-
-const compositions = getModule(Compositions)
+import { compositionsStore } from '@/store'
 
 @Component({
   components: {
@@ -62,14 +57,13 @@ const compositions = getModule(Compositions)
 })
 export default class TablesPanel extends Vue {
   get currentCompositionSpec () {
-    return compositionToUrlQuerySpec(compositions.current)
+    return compositionToUrlQuerySpec(compositionsStore.current)
   }
   get currentComposition () {
-    return compositions.current
+    return compositionsStore.current
   }
   get allCompositions () {
-    return compositions.asArray
+    return compositionsStore.asArray
   }
 }
-
 </script>

@@ -81,9 +81,7 @@
   </v-dialog>
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>
 
 <script lang="ts">
 import Vue from 'vue'
@@ -116,5 +114,4 @@ export default class ImageUploaderButton extends Vue {
     this.dialog = false
   }
 }
-
 </script>

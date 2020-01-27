@@ -8,20 +8,15 @@
   </v-container>
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>
 
 <script lang="ts">
 import Vue from 'vue'
 import Component from 'vue-class-component'
-import { getModule } from 'vuex-module-decorators'
 
 import Gallery from '@/components/Gallery.vue'
 
-import Settings from '@/store/settings.ts'
-
-const settings = getModule(Settings)
+import { settingsStore } from '@/store'
 
 @Component({
   components: {
@@ -30,11 +25,10 @@ const settings = getModule(Settings)
 })
 export default class ImagesPanel extends Vue {
   get isColored (): boolean {
-    return settings.showImageColors
+    return settingsStore.showImageColors
   }
   set isColored (value: boolean) {
-    settings.setShowImageColors(value)
+    settingsStore.setShowImageColors(value)
   }
 }
-
 </script>

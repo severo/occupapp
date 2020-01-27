@@ -70,21 +70,12 @@
 <script lang="ts">
 import Vue from 'vue'
 import Component from 'vue-class-component'
-import { getModule } from 'vuex-module-decorators'
 import { mdiPlus } from '@mdi/js'
 import { Point } from '@/types'
 
 import MainPanel from '@/components/MainPanel.vue'
 
-import Categories from '@/store/current/categories.ts'
-import PointsSelection from '@/store/current/pointsSelection.ts'
-import Points from '@/store/current/points.ts'
-import Socket from '@/store/socket.ts'
-
-const categories = getModule(Categories)
-const pointsSelection = getModule(PointsSelection)
-const points = getModule(Points)
-const socket = getModule(Socket)
+import { categoriesStore, pointsStore, pointsSelectionStore } from '@/store'
 
 @Component({
   components: {
@@ -94,7 +85,7 @@ const socket = getModule(Socket)
 export default class Main extends Vue {
   // annotate refs type
   $refs!: {
-    container: HTMLElement,
+    container: HTMLElement
     firstcol: HTMLElement
   }
 
@@ -102,64 +93,34 @@ export default class Main extends Vue {
     return mdiPlus
   }
   get widthGetter (): () => number {
-    return () => this.$refs.firstcol ? this.$refs.firstcol.clientWidth : 300
+    return () => (this.$refs.firstcol ? this.$refs.firstcol.clientWidth : 300)
   }
   get heightGetter (): () => number {
-    return () => this.$refs.container ? this.$refs.container.clientHeight : 150
+    return () =>
+      this.$refs.container ? this.$refs.container.clientHeight : 150
   }
 
   get selectedPointsText (): string {
-    return `${pointsSelection.size} ${pointsSelection.size === 1 ? 'point' : 'points'}`
+    return `${pointsSelectionStore.size} ${
+      pointsSelectionStore.size === 1 ? 'point' : 'points'
+    }`
   }
   get showBanner (): boolean {
-    return pointsSelection.size > 0
+    return pointsSelectionStore.size > 0
   }
 
   // methods
   cancelSelection () {
-    pointsSelection.clear()
+    pointsSelectionStore.clear()
   }
   deleteSelection () {
-    points.deleteSet(pointsSelection.asSet)
-    // Send to the socket server
-    // socket.change(this.getSocketCallbackDeletePoints(pointsSelection.asArray))
-    pointsSelection.clear()
+    pointsStore.deleteSet(pointsSelectionStore.asSet)
+    pointsSelectionStore.clear()
   }
   addPoint () {
-    // As the API doesn't return the created point, we have to look for it
-    const before = new Set(points.asMap.keys())
-    points.postRandom(categories.asArray[points.size % categories.size].id)
-    // const after = new Set(points.asMap.keys())
-    // const difference: string[] = [...after].filter(x => !before.has(x))
-    // if (difference.length === 1) {
-    //   const lastPoint = points.asMap.get(difference[0])
-    //   if (lastPoint !== undefined) {
-    //     // Send to the socket server
-    //     socket.change(this.getSocketCallbackAddPoint(lastPoint))
-    //   }
-    // }
-  }
-
-  // TODO: don't use any type
-  getSocketCallbackDeletePoints (ids: string[]): any {
-    // TODO: don't use any type
-    return (doc: any) => {
-      for (let i = 0; i < ids.length; i++) {
-        delete doc.composition.points[ids[i]]
-      }
-    }
-  }
-
-  getSocketCallbackAddPoint (point: Point): any {
-    // TODO: don't use any type
-    return (doc: any) => {
-      doc.composition.points[point.id] = {}
-      doc.composition.points[point.id].id = point.id
-      doc.composition.points[point.id].number = point.number
-      doc.composition.points[point.id].x = point.x
-      doc.composition.points[point.id].y = point.y
-      doc.composition.points[point.id].categoryId = point.categoryId
-    }
+    pointsStore.postRandom(
+      categoriesStore.asArray[pointsStore.size % categoriesStore.size].id
+    )
   }
 }
 </script>

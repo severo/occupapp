@@ -24,7 +24,7 @@ export default class ImageCacheCanvas extends Vue {
 
   // annotate refs type
   $refs!: {
-    canvas: HTMLCanvasElement,
+    canvas: HTMLCanvasElement
   }
 
   // computed
@@ -47,9 +47,18 @@ export default class ImageCacheCanvas extends Vue {
 
   // methods
   drawCanvas (): void {
-    if (this.ctx === null) { return }
+    if (this.ctx === null) {
+      return
+    }
     // Redraw & reposition content
-    this.ctx.setTransform(this.devicePixelRatio, 0, 0, this.devicePixelRatio, 0, 0)
+    this.ctx.setTransform(
+      this.devicePixelRatio,
+      0,
+      0,
+      this.devicePixelRatio,
+      0,
+      0
+    )
     this.ctx.clearRect(0, 0, this.width, this.height)
     if (this.image.width === 0 || this.image.height === 0) {
       // Show a white rectangle in case the image is empty
@@ -73,7 +82,10 @@ export default class ImageCacheCanvas extends Vue {
   @Watch('width')
   @Watch('height')
   @Watch('devicePixelRatio')
-  onSomethingChange (val: boolean | number | HTMLImageElement, oldVal: boolean | number | HTMLImageElement) {
+  onSomethingChange (
+    val: boolean | number | HTMLImageElement,
+    oldVal: boolean | number | HTMLImageElement
+  ) {
     // See https://stackoverflow.com/a/37588776/7351594
     clearTimeout(this.debounceTimer)
     this.debounceTimer = window.setTimeout(() => {

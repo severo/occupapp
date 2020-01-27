@@ -29,7 +29,6 @@
 <script lang="ts">
 import Vue from 'vue'
 import Component from 'vue-class-component'
-import { getModule } from 'vuex-module-decorators'
 import { Prop, Watch } from 'vue-property-decorator'
 import { Delaunay } from 'd3-delaunay'
 import * as d3 from 'd3'
@@ -37,17 +36,13 @@ import { Point } from '@/types'
 
 import ImageCacheCanvas from '@/components/ImageCacheCanvas.vue'
 
-import Settings from '@/store/settings.ts'
-import BackgroundImage from '@/store/current/backgroundImage.ts'
-import Categories from '@/store/current/categories.ts'
-import Points from '@/store/current/points.ts'
-import PointsMetrics from '@/store/current/pointsMetrics.ts'
-
-const settings = getModule(Settings)
-const backgroundImage = getModule(BackgroundImage)
-const categories = getModule(Categories)
-const points = getModule(Points)
-const pointsMetrics = getModule(PointsMetrics)
+import {
+  backgroundImageStore,
+  categoriesStore,
+  pointsStore,
+  pointsMetricsStore,
+  settingsStore
+} from '@/store'
 
 @Component({
   components: {
@@ -68,12 +63,12 @@ export default class Background extends Vue {
 
   // annotate refs type
   $refs!: {
-    imagecanvas: HTMLCanvasElement,
+    imagecanvas: HTMLCanvasElement
   }
 
   // computed
   get image (): HTMLImageElement {
-    return backgroundImage.image
+    return backgroundImageStore.image
   }
   get canvas (): HTMLCanvasElement {
     return this.$refs.imagecanvas
@@ -90,21 +85,21 @@ export default class Background extends Vue {
   get totalArea (): number {
     return this.width * this.height
   }
-  get canvasStyle (): {width: string, height: string} {
+  get canvasStyle (): { width: string; height: string } {
     return {
       width: `${this.width}px`,
       height: `${this.height}px`
     }
   }
-  get wrapperStyle (): {width: string, height: string} {
+  get wrapperStyle (): { width: string; height: string } {
     return { ...this.canvasStyle }
   }
   get pointsArray (): Point[] {
-    return points.asArray
+    return pointsStore.asArray
   }
   // TODO check if there is a best practice for use of 'private' keyword, and if we follow it
   private get isPlaceholderVisible (): boolean {
-    return !backgroundImage.isReady
+    return !backgroundImageStore.isReady
   }
   private get isCanvasVisible (): boolean {
     return !this.isPlaceholderVisible
@@ -129,7 +124,7 @@ export default class Background extends Vue {
     ).voronoi([0, 0, this.width, this.height])
   }
   get isColored (): boolean {
-    return settings.showImageColors
+    return settingsStore.showImageColors
   }
 
   // methods
@@ -139,9 +134,18 @@ export default class Background extends Vue {
   }
 
   drawCanvas (): void {
-    if (this.ctx === null) { return }
+    if (this.ctx === null) {
+      return
+    }
     // Redraw & reposition content
-    this.ctx.setTransform(this.devicePixelRatio, 0, 0, this.devicePixelRatio, 0, 0)
+    this.ctx.setTransform(
+      this.devicePixelRatio,
+      0,
+      0,
+      this.devicePixelRatio,
+      0,
+      0
+    )
     this.ctx.clearRect(0, 0, this.width, this.height)
     // Note: if image "srcset" is set (responsive image), the most adequate image size is used here
     // TODO confirm above comment
@@ -160,7 +164,7 @@ export default class Background extends Vue {
       context.beginPath()
       v.renderCell(i++, context)
       context.globalAlpha = 0.5
-      context.fillStyle = categories.getColor(point.categoryId)
+      context.fillStyle = categoriesStore.getColor(point.categoryId)
       context.fill()
 
       context.globalAlpha = 1
@@ -182,7 +186,7 @@ export default class Background extends Vue {
         p => [p[0], p[1]]
       )
       const area = Math.abs(d3.polygonArea(polygon)) / this.totalArea
-      pointsMetrics.setArea({ pointId: point.id, area })
+      pointsMetricsStore.setArea({ pointId: point.id, area })
     }
   }
 
